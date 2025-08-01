@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CES - v1.1</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/stylesheets/style.css">
+    <link rel="stylesheet" href="assets/stylesheets/materiais.css">
+
+    <!-- FONTES E ÍCONES -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+<!-- Script de verificação de login -->
+<script>
+    if (!localStorage.getItem('jwt_token')) {
+        window.location.href = '/login.html';
+    }
+</script>
+
+<div class="app-container">
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <nav class="sidebar">
+        <a href="#" class="sidebar-logo">
+            <img src="assets/sipel.svg" alt="Logo Sipel">
+        </a>
+        <ul class="sidebar-menu">
+            <li data-tooltip="Dashboard">
+                <a href="#" class="sidebar-link active" data-submenu="dashboard">
+                    <i class="ph-bold ph-chart-pie-slice"></i>
+                </a>
+            </li>
+            <li data-tooltip="Cadastros">
+                <a href="#" class="sidebar-link" data-submenu="cadastros">
+                    <i class="ph-bold ph-folder-plus"></i>
+                </a>
+            </li>
+            <li data-tooltip="Solicitações">
+                <a href="#" class="sidebar-link" data-submenu="solicitacoes">
+                    <i class="ph-bold ph-file-text"></i>
+                </a>
+            </li>
+        </ul>
+        <div data-tooltip="Sair">
+            <a href="#" class="sidebar-link" id="logoutButton">
+                <i class="ph-bold ph-sign-out"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- PAINEL DO SUBMENU -->
+    <div class="submenu-panel">
+        <div id="submenu-dashboard" class="submenu-content">
+            <h3>Dashboard</h3>
+            <ul>
+                <li><a href="#" class="page-link" data-page="page-dashboard">Visão Geral</a></li>
+            </ul>
+        </div>
+        <div id="submenu-cadastros" class="submenu-content">
+            <h3>Cadastros</h3>
+            <ul>
+                <li><a href="#" class="page-link" data-page="page-materiais">Materiais</a></li>
+                <li><a href="#" class="page-link" data-page="page-obras">Obras</a></li>
+                <li><a href="#" class="page-link" data-page="page-equipes">Equipes</a></li>
+                <li><a href="#" class="page-link" data-page="page-encarregados">Encarregados</a></li>
+            </ul>
+        </div>
+        <div id="submenu-solicitacoes" class="submenu-content">
+            <h3>Solicitações</h3>
+            <ul>
+                <li><a href="#" class="page-link" data-page="page-solicitacoes-nova">Nova Solicitação</a></li>
+                <li><a href="#" class="page-link" data-page="page-solicitacoes-lista">Minhas Solicitações</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-bar">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Buscar por funcionalidades, materiais, obras...">
+            </div>
+        </header>
+
+        <section class="content-area">
+            <!-- PÁGINA: DASHBOARD -->
+            <div id="page-dashboard" class="page active">
+                <div class="page-header">
+                    <h1>Visão Geral</h1>
+                    <p>Seja bem-vindo de volta, Alexandre.</p>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><span id="kpi-solicitacoes-pendentes">12</span>Solicitações Pendentes</div>
+                    <div class="kpi-card"><span id="kpi-obras-ativas">4</span>Obras Ativas</div>
+                    <div class="kpi-card"><span id="kpi-itens-estoque-baixo">8</span>Itens em Estoque Baixo</div>
+                    <div class="kpi-card"><span id="kpi-atendimentos-mes">127</span>Atendimentos no Mês</div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="quick-links-card">
+                        <h2>Ações Rápidas</h2>
+                        <ul>
+                            <li><a href="#"><i class="ph ph-plus-circle"></i> Criar Nova Solicitação</a></li>
+                            <li><a href="#"><i class="ph ph-magnifying-glass"></i> Buscar um Material</a></li>
+                            <li><a href="#"><i class="ph ph-wrench"></i> Gerenciar Cadastros</a></li>
+                        </ul>
+                    </div>
+                    <div class="updates-card">
+                        <h2>Últimas Atualizações</h2>
+                        <ul>
+                            <li><strong>Versão 1.1.0</strong><p>Adicionada a funcionalidade de links rápidos no dashboard e melhorias na interface.</p></li>
+                            <li><strong>Versão 1.0.0</strong><p>Lançamento inicial do sistema de controle de estoque.</p></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PÁGINA: CADASTRO DE MATERIAIS (ATUALIZADA) -->
+            <div id="page-materiais" class="page">
+                <div class="page-header">
+                    <h1>Cadastro de Materiais</h1>
+                    <p>Gerencie todos os materiais do seu estoque.</p>
+                    <button id="btn-novo-material" class="btn-primary">
+                        <i class="ph ph-plus"></i> Novo Material
+                    </button>
+                </div>
+
+                <div id="form-material-container" class="form-container" style="display: none;">
+                    <div class="form-header">
+                        <h2 id="form-material-title">Novo Material</h2>
+                        <button id="btn-fechar-form" class="btn-icon">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+                    <form id="form-material">
+                        <input type="hidden" id="material-id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="codigo-material">Código do Material*</label>
+                                <input type="text" id="codigo-material" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nome-material">Nome do Material*</label>
+                                <input type="text" id="nome-material" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="descricao-material">Descrição</label>
+                            <textarea id="descricao-material" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="unidade-medida">Unidade de Medida*</label>
+                                <select id="unidade-medida" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="UN">Unidade (UN)</option>
+                                    <option value="KG">Quilograma (KG)</option>
+                                    <option value="M">Metro (M)</option>
+                                    <option value="M2">Metro Quadrado (M²)</option>
+                                    <option value="M3">Metro Cúbico (M³)</option>
+                                    <option value="L">Litro (L)</option>
+                                    <option value="CX">Caixa (CX)</option>
+                                    <option value="PC">Peça (PC)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="supr-matr">Tipo (Supr/Matr)*</label>
+                                <select id="supr-matr" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="SUPR">SUPR</option>
+                                    <option value="MATR">MATR</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="avaliacao">Avaliação*</label>
+                                <input type="text" id="avaliacao" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="centro">Centro*</label>
+                                <input type="text" id="centro" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="btn-cancelar" class="btn-secondary">Cancelar</button>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-actions">
+                        <div class="search-container">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" id="busca-material" placeholder="Buscar material...">
+                        </div>
+                    </div>
+                    <table id="tabela-materiais" class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nome</th>
+                            <th>Unidade</th>
+                            <th>Tipo</th>
+                            <th>Centro</th>
+                            <th>Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Os dados serão carregados via JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="sem-materiais" class="empty-state" style="display: none;">
+                        <i class="ph ph-package"></i>
+                        <p>Nenhum material cadastrado</p>
+                        <button id="btn-novo-material-empty" class="btn-primary">
+                            <i class="ph ph-plus"></i> Adicionar Material
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- SCRIPTS JS -->
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/materiais.js"></script>
+</body>
+</html>
