@@ -27,11 +27,25 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // Assets
                         .requestMatchers(HttpMethod.GET, "/", "/**.html", "/assets/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/material").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .requestMatchers("/error").permitAll()
+
+                        // Auth-API
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
+
+                        // Materiais-API
+                        .requestMatchers(HttpMethod.GET, "/api/v1/material").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/material").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
+
+                        // Obras-API
+                        .requestMatchers(HttpMethod.POST, "/api/v1/obras").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/obras/import").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
+
+                        // AnyResquest, precisa apenas estar authenticado
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
