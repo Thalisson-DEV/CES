@@ -96,7 +96,6 @@
     <main class="main-content">
       <header class="top-bar">
         <div class="search-bar">
-          <i class="ph ph-magnifying-glass"></i>
           <input type="text" placeholder="Buscar por funcionalidades, materiais, obras...">
         </div>
       </header>
@@ -123,7 +122,7 @@
         <input type="password" id="senhaHash" name="senha" required value="password">
       </div>
       <div id="feedback" class="feedback" style="display: none;"></div>
-      <button type="submit" id="loginButton">Entrar</button>
+      <button type="submit" class="btn-primary" id="loginButton">Entrar</button>
     </form>
   </main>
 </template>
@@ -187,6 +186,7 @@
         <th>Nome</th>
         <th>Unidade</th>
         <th>Tipo</th>
+        <th>Avaliação</th>
         <th>Centro</th>
         <th>Ações</th>
       </tr>
@@ -209,7 +209,7 @@
       <p>Gerencie os projetos e obras da empresa.</p>
     </div>
     <div class="header-actions">
-      <a href="#" download class="btn-secondary" id="btn-download-modelo-obras">
+      <a href="assets/templates/modelo_obras.xlsx" download class="btn-secondary" id="btn-download-modelo-obras">
         <i class="ph ph-download-simple"></i> Baixar Modelo
       </a>
       <button id="btn-importar-obras" class="btn-secondary">
@@ -293,7 +293,7 @@
           <input type="email" id="profile-email" value="alexandre@sipel.com.br" required>
         </div>
         <hr class="form-divider">
-        <p class="form-section-title">Alterar Senha</p>
+        <hr class="form-divider">
         <div class="form-group">
           <label for="profile-current-password">Senha Atual</label>
           <input type="password" id="profile-current-password" placeholder="Deixe em branco para não alterar">

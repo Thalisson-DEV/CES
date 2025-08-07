@@ -52,7 +52,12 @@ async function loadMaterials() {
 function renderMaterialsTable(materials) {
     const tableBody = document.querySelector('#tabela-materiais tbody');
     const emptyState = document.getElementById('empty-state-materiais');
-    const tableContainer = document.querySelector('#template-materials .table-container');
+    const tableContainer = document.querySelector('#page-content .table-container');
+
+    if (!tableBody || !emptyState || !tableContainer) {
+        console.error('Elementos da tabela de materiais não encontrados no DOM.');
+        return;
+    }
 
     tableBody.innerHTML = '';
 
@@ -64,11 +69,14 @@ function renderMaterialsTable(materials) {
         tableContainer.style.display = 'block';
         materials.forEach(material => {
             const tr = document.createElement('tr');
+            // MELHORIA: Adicionada a coluna "Avaliação" na tabela.
+            // Lembre-se de adicionar o <th>Avaliação</th> no seu template HTML.
             tr.innerHTML = `
                 <td>${material.codigoMaterial}</td>
                 <td>${material.nomeMaterial}</td>
                 <td>${material.unidadeMedida}</td>
                 <td><span class="tag">${material.suprMatr || 'N/A'}</span></td>
+                <td>${material.avaliacao || 'N/A'}</td>
                 <td>${material.centro}</td>
                 <td class="actions">
                     <button class="btn-icon btn-edit" data-id="${material.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -88,6 +96,7 @@ function showMaterialForm(material = null) {
     const isEdit = material !== null;
     const title = isEdit ? 'Editar Material' : 'Novo Material';
 
+    // MELHORIA: Inputs de texto foram trocados por selects.
     const formBody = `
         <form id="form-material" class="drawer-form">
             <input type="hidden" id="material-id" value="${isEdit ? material.id : ''}">
@@ -110,28 +119,43 @@ function showMaterialForm(material = null) {
                 </div>
                 <div class="form-group">
                     <label for="supr-matr">Tipo (Supr/Matr)*</label>
-                    <input type="text" id="supr-matr" required value="${isEdit ? material.suprMatr || '' : ''}">
+                    <select id="supr-matr" required></select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="centro">Centro*</label>
-                <input type="text" id="centro" required value="${isEdit ? material.centro || '' : ''}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="avaliacao">Avaliação*</label>
+                    <select id="avaliacao" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="centro">Centro*</label>
+                    <select id="centro" required></select>
+                </div>
             </div>
         </form>
     `;
 
     showDrawer({ title, body: formBody, onSave: handleFormSubmit });
 
-    // Preenche o select de unidades após o drawer ser renderizado
-    const selectUnidade = document.getElementById('unidade-medida');
-    const unidades = ['UN', 'KG', 'M', 'M2', 'M3', 'L', 'CX', 'PC'];
-    unidades.forEach(un => {
-        const option = new Option(un, un);
-        selectUnidade.add(option);
-    });
-    if (isEdit) {
-        selectUnidade.value = material.unidadeMedida;
-    }
+    // Helper para popular os selects de forma mais limpa
+    const populateSelect = (elementId, options, selectedValue) => {
+        const select = document.getElementById(elementId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Selecione...</option>';
+        options.forEach(opt => {
+            const option = new Option(opt, opt);
+            select.add(option);
+        });
+        if (selectedValue) {
+            select.value = selectedValue;
+        }
+    };
+
+    // Popula todos os campos de seleção
+    populateSelect('unidade-medida', ['UN', 'KG', 'M', 'M2', 'M3', 'L', 'CX', 'PC'], isEdit ? material.unidadeMedida : null);
+    populateSelect('supr-matr', ['SUPR', 'MATR'], isEdit ? material.suprMatr : null);
+    populateSelect('avaliacao', ['INVEST', 'MANUT', 'SUCATA', 'RECUP'], isEdit ? material.avaliacao : null);
+    populateSelect('centro', ['610', '670'], isEdit ? material.centro : null);
 }
 
 /**
@@ -150,13 +174,14 @@ async function handleFormSubmit() {
         descricao: form.querySelector('#descricao-material').value,
         unidadeMedida: form.querySelector('#unidade-medida').value,
         suprMatr: form.querySelector('#supr-matr').value,
+        avaliacao: form.querySelector('#avaliacao').value,
         centro: form.querySelector('#centro').value,
     };
 
-    // Validação simples
-    if (!materialData.codigoMaterial || !materialData.nomeMaterial) {
-        showNotification('Código e Nome são obrigatórios.', 'error');
-        throw new Error('Validation failed'); // Impede o fechamento do drawer
+    // MELHORIA: Validação mais completa
+    if (!materialData.codigoMaterial || !materialData.nomeMaterial || !materialData.unidadeMedida || !materialData.suprMatr || !materialData.avaliacao || !materialData.centro) {
+        showNotification('Todos os campos com * são obrigatórios.', 'error');
+        throw new Error('Validation failed');
     }
 
     const endpoint = isEdit ? `/api/v1/material/${id}` : '/api/v1/material';
@@ -167,14 +192,26 @@ async function handleFormSubmit() {
             method,
             body: JSON.stringify(materialData)
         });
-        if (!response.ok) throw new Error(`Falha ao ${isEdit ? 'atualizar' : 'criar'} material.`);
+
+        if (!response.ok) {
+            let errorMsg = `Falha ao ${isEdit ? 'atualizar' : 'criar'} material.`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) {
+                    errorMsg = errorData.message;
+                }
+            } catch (e) {
+                console.warn('Não foi possível parsear a resposta de erro como JSON.');
+            }
+            throw new Error(errorMsg);
+        }
 
         showNotification(`Material ${isEdit ? 'atualizado' : 'criado'} com sucesso!`, 'success');
         closeDrawer();
         loadMaterials();
     } catch (error) {
         showNotification(error.message, 'error');
-        throw error; // Re-lança o erro para o `onSave` saber que falhou
+        throw error;
     }
 }
 
@@ -187,6 +224,7 @@ function handleSearch(e) {
         material.nomeMaterial?.toLowerCase().includes(searchTerm) ||
         material.codigoMaterial?.toLowerCase().includes(searchTerm) ||
         material.suprMatr?.toLowerCase().includes(searchTerm) ||
+        material.avaliacao?.toLowerCase().includes(searchTerm) ||
         material.centro?.toLowerCase().includes(searchTerm)
     );
     renderMaterialsTable(filteredMaterials);

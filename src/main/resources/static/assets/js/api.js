@@ -20,7 +20,6 @@ export async function fetchAutenticado(endpoint, options = {}) {
         ...options.headers,
     };
 
-    // Se o corpo da requisição é FormData, o navegador define o Content-Type.
     if (!(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
@@ -33,19 +32,32 @@ export async function fetchAutenticado(endpoint, options = {}) {
     try {
         const response = await fetch(API_BASE_URL + endpoint, requestOptions);
 
-        // Se o token for inválido ou expirado, redireciona para o login.
-        if (response.status === 401 || response.status === 403) {
-            console.error('Token inválido ou expirado. Redirecionando...');
+        // --- LÓGICA DE TRATAMENTO DE ERRO ATUALIZADA ---
+
+        // Caso 1: 401 Unauthorized (Token inválido ou sessão expirou)
+        // Ação: Redirecionar para o login.
+        if (response.status === 401) {
+            console.error('Token inválido ou expirado (401). Redirecionando para o login...');
             localStorage.removeItem('jwt_token');
             window.location.hash = '/login';
-            throw new Error('Acesso não autorizado.');
+            // Lança um erro para interromper a execução na função que chamou.
+            throw new Error('Sua sessão expirou. Por favor, faça login novamente.');
         }
 
+        // Caso 2: 403 Forbidden (Usuário logado, mas sem permissão para a ação)
+        // Ação: NÃO redirecionar. Apenas lançar um erro que será mostrado como notificação.
+        if (response.status === 403) {
+            console.error('Acesso negado (403 Forbidden). O usuário não tem a role necessária.');
+            // Lança um erro com uma mensagem amigável.
+            throw new Error('Você não tem permissão para executar esta ação.');
+        }
+
+        // Se não for nenhum dos erros acima, a função continua normalmente.
         return response;
 
     } catch (error) {
-        console.error('Erro na requisição para o endpoint:', endpoint, error);
-        // Re-lança o erro para que a função que chamou possa tratá-lo.
+        // Re-lança o erro (seja o de rede, 401 ou 403) para que a função que chamou (ex: em materials.js)
+        // possa capturá-lo em seu próprio bloco catch e mostrar a notificação.
         throw error;
     }
 }

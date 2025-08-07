@@ -1,5 +1,6 @@
 package com.sipel.CES.obras.controller;
 
+import com.sipel.CES.exceptions.ObraException;
 import com.sipel.CES.obras.DTO.ObraResponseDTO;
 import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
 import com.sipel.CES.obras.DTO.ObraDTO;
@@ -26,11 +27,9 @@ public class ObraController {
             ImportacaoResponseDTO resultado = obraService.importarObras(file);
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
-            // Log detalhado do erro para análise
             System.out.println("Erro na importação de obras: " + e.getMessage());
             e.printStackTrace();
 
-            // Retorna mensagem mais descritiva e amigável
             String mensagemErro = "Erro ao processar o arquivo: ";
             if (e.getMessage().contains("formato") || e.getMessage().contains("inválido")) {
                 mensagemErro = "O arquivo está em formato inválido. Por favor, utilize o modelo correto.";
@@ -53,6 +52,15 @@ public class ObraController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDENACAO')")
     public ResponseEntity deleteObra(@PathVariable(value = "id") Integer id) {
+        try {
+            ObraResponseDTO obra =  obraService.getObraById(id);
+            if (obra.status() != null && obra.status().id() == 4){
+                return ResponseEntity.badRequest().body("Não é possivel deletar uma obra concluida!");
+            }
+        } catch (Exception e){
+            System.out.println("Erro ao deletar obra: " + e.getMessage());
+            throw e;
+        }
         obraService.deleteObra(id);
         return ResponseEntity.noContent().build();
     }
@@ -63,7 +71,7 @@ public class ObraController {
         try {
             ObraResponseDTO response = obraService.createObra(data);
             return ResponseEntity.status(201).body(response);
-        } catch (Exception e) {
+        } catch (ObraException e) {
             // Log do erro para análise posterior
             System.out.println("Erro ao criar obra: " + e.getMessage());
             throw e; // Relança para que seja manipulado pelo handler global
@@ -72,7 +80,16 @@ public class ObraController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDENACAO')")
-    public ResponseEntity<ObraResponseDTO> updateObra(@PathVariable(value = "id") Integer id, @RequestBody ObraDTO data) {
+    public ResponseEntity<?> updateObra(@PathVariable(value = "id") Integer id, @RequestBody ObraDTO data) {
+        try {
+            ObraResponseDTO obra = obraService.getObraById(id);
+            if (obra.status() != null && obra.status().id() == 4){
+                return ResponseEntity.badRequest().body(obra);
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao criar obra: " + e.getMessage());
+            throw e;
+        }
         ObraResponseDTO response = obraService.updateObra(id, data);
         return ResponseEntity.ok(response);
     }

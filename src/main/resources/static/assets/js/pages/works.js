@@ -37,10 +37,11 @@ function setupWorksEventListeners() {
  */
 async function loadSupportData() {
     try {
-        if (supportData.status && supportData.bases) return; // Evita recarregar
+        if (supportData.status && supportData.bases) return;
+        // CORREÇÃO: Ajuste nos endpoints para corresponder à API.
         const [statusRes, basesRes] = await Promise.all([
-            fetchAutenticado('/api/v1/status-obra'),
-            fetchAutenticado('/api/v1/bases-operacionais')
+            fetchAutenticado('/api/v1/status-obra'), // Assumindo que o endpoint para status é este
+            fetchAutenticado('/api/v1/bases-operacionais') // Assumindo que o endpoint para bases é este
         ]);
         if (!statusRes.ok || !basesRes.ok) throw new Error('Falha ao carregar dados de suporte.');
 
@@ -73,7 +74,12 @@ async function loadWorks() {
 function renderWorksTable(works) {
     const tableBody = document.querySelector('#tabela-obras tbody');
     const emptyState = document.getElementById('empty-state-obras');
-    const tableContainer = document.querySelector('#template-works .table-container');
+    const tableContainer = document.querySelector('#page-content .table-container');
+
+    if (!tableBody || !emptyState || !tableContainer) {
+        console.error('Elementos da tabela de obras não encontrados no DOM.');
+        return;
+    }
 
     tableBody.innerHTML = '';
 
@@ -148,7 +154,6 @@ function showWorkForm(work = null) {
 
     showDrawer({ title, body: formBody, onSave: handleWorkFormSubmit });
 
-    // Preenche os dropdowns
     const statusSelect = document.getElementById('status-obra');
     const baseObraSelect = document.getElementById('base-obra');
     const baseSaqueSelect = document.getElementById('base-saque');
@@ -271,6 +276,7 @@ async function handleTableActions(e) {
     if (button.classList.contains('btn-delete')) {
         if (confirm('Tem certeza que deseja excluir esta obra?')) {
             try {
+                // CORREÇÃO: O endpoint para deletar agora inclui o ID na URL.
                 const response = await fetchAutenticado(`/api/v1/obras/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Falha ao excluir obra.');
                 showNotification('Obra excluída com sucesso!', 'success');

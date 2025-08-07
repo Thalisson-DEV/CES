@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface ObraRepository extends JpaRepository<Obra, Integer> {
     Optional<Obra> findByNumeroObra(String numeroObra);
 
+    Optional<Obra> findById(int id);
+
     @Query("SELECT o FROM obras o JOIN FETCH o.statusObra JOIN FETCH o.baseObra JOIN FETCH o.baseSaque")
     List<Obra> findAllWithDetails();
 }
