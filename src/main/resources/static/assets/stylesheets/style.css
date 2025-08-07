@@ -551,3 +551,160 @@ a {
     transition: var(--transition-fast); box-shadow: var(--shadow-md);
 }
 [data-tooltip]:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+/* --- 12. BARRA DE FILTROS --- */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+    min-width: 180px;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+}
+
+.filter-group.search {
+    flex-grow: 2;
+}
+
+.filter-group .search-container {
+    width: 100%;
+}
+
+/* --- 13. CONTROLES DE PAGINAÇÃO --- */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-summary {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.pagination-summary strong {
+    color: var(--text-primary);
+}
+
+.pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-nav .btn-icon {
+    border: 1px solid var(--border-color);
+}
+
+.pagination-nav .page-info {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0 0.5rem;
+}
+
+.pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pagination-size label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.pagination-size select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    min-width: 70px;
+}
+
+/* ESTILOS GLOBAIS DE FORMULÁRIO */
+.input-group, .form-group {
+    margin-bottom: 1.25rem;
+    text-align: left;
+}
+.input-group label, .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+/* Regra principal para estilizar todos os campos, incluindo os selects dos filtros */
+.input-group input, .form-group input,
+.input-group select, .form-group select,
+.input-group textarea, .form-group textarea,
+.search-bar input, .search-container input,
+.pagination-size select, .filter-group select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 0.95rem;
+    transition: var(--transition-fast);
+    color: var(--text-primary);
+
+    /* Remove a aparência padrão do navegador */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Adiciona uma seta customizada como imagem de fundo */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem; /* Espaço para a seta não sobrepor o texto */
+}
+
+/* Remove a seta customizada para inputs de texto e textareas */
+.input-group input, .form-group input,
+.input-group textarea, .form-group textarea,
+.search-bar input, .search-container input {
+    background-image: none;
+    padding-right: 1rem;
+}
+
+/* Estilo para quando o campo está focado (selecionado) */
+.input-group input:focus, .form-group input:focus,
+.input-group select:focus, .form-group select:focus,
+.input-group textarea:focus, .form-group textarea:focus,
+.search-bar input:focus, .search-container input:focus,
+.pagination-size select:focus, .filter-group select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(12, 41, 222, 0.15);
+}

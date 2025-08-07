@@ -18,9 +18,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable; // <-- ADICIONE ESTA LINHA
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -211,6 +213,11 @@ public class ObraService {
             default:
                 return null;
         }
+    }
+
+    public Page<ObraResponseDTO> getAllObras(Integer statusId, Integer baseId, String searchTerm, Pageable pageable) {
+        Page<Obra> obraPage = repository.findWithFilters(statusId, baseId, searchTerm, pageable);
+        return obraPage.map(ObraResponseDTO::new);
     }
 
     private void mapDtoToEntity(@NotNull ObraDTO dto, @NotNull Obra entity) {

@@ -96,7 +96,7 @@
     <main class="main-content">
       <header class="top-bar">
         <div class="search-bar">
-          <input type="text" placeholder="Buscar por funcionalidades, materiais, obras...">
+          <input type="text" placeholder="Buscar por modulo">
         </div>
       </header>
       <section id="page-content" class="content-area">
@@ -158,7 +158,7 @@
   </div>
 </template>
 
-<!-- Template da Página de Materiais -->
+<!-- TEMPLATE DE MATERIAIS ATUALIZADO -->
 <template id="template-materials">
   <div class="page-header">
     <div>
@@ -166,19 +166,57 @@
       <p>Gerencie todos os materiais do seu estoque.</p>
     </div>
     <div class="header-actions">
+      <a href="/assets/templates/modelo_materiais.xlsx" download class="btn-secondary">
+        <i class="ph ph-download-simple"></i> Baixar Modelo
+      </a>
+      <button id="btn-importar-materiais" class="btn-secondary">
+        <i class="ph ph-upload-simple"></i> Importar
+      </button>
       <button id="btn-novo-material" class="btn-primary">
         <i class="ph ph-plus"></i> Novo Material
       </button>
+      <input type="file" id="input-arquivo-materiais" accept=".xlsx, .xls" style="display: none;">
+    </div>
+  </div>
+
+  <!-- NOVA BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-material-tipo">Tipo</label>
+      <select id="filter-material-tipo">
+        <option value="">Todos</option>
+        <option value="SUPR">SUPR</option>
+        <option value="MATR">MATR</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-material-avaliacao">Avaliação</label>
+      <select id="filter-material-avaliacao">
+        <option value="">Todas</option>
+        <option value="INVEST">INVEST</option>
+        <option value="MANUT">MANUT</option>
+        <option value="SUCATA">SUCATA</option>
+        <option value="RECUP">RECUP</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-material-centro">Centro</label>
+      <select id="filter-material-centro">
+        <option value="">Todos</option>
+        <option value="610">610</option>
+        <option value="670">670</option>
+      </select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-material">Busca por texto</label>
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-material" placeholder="Código, nome...">
+      </div>
     </div>
   </div>
 
   <div class="table-container">
-    <div class="table-actions-header">
-      <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
-        <input type="text" id="busca-material" placeholder="Buscar por código, nome, tipo...">
-      </div>
-    </div>
     <table class="data-table" id="tabela-materiais">
       <thead>
       <tr>
@@ -194,14 +232,13 @@
       <tbody></tbody>
     </table>
   </div>
-  <div id="empty-state-materiais" class="empty-state">
-    <i class="ph ph-package"></i>
-    <h3>Nenhum material encontrado</h3>
-    <p>Cadastre o primeiro material para começar a gerenciar seu estoque.</p>
-  </div>
+  <div id="empty-state-materiais" class="empty-state"></div>
+
+  <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-materiais"></div>
 </template>
 
-<!-- Template da Página de Obras -->
+<!-- TEMPLATE DE OBRAS ATUALIZADO -->
 <template id="template-works">
   <div class="page-header">
     <div>
@@ -209,7 +246,7 @@
       <p>Gerencie os projetos e obras da empresa.</p>
     </div>
     <div class="header-actions">
-      <a href="assets/templates/modelo_obras.xlsx" download class="btn-secondary" id="btn-download-modelo-obras">
+      <a href="/templates/modelo_obras.xlsx" download class="btn-secondary">
         <i class="ph ph-download-simple"></i> Baixar Modelo
       </a>
       <button id="btn-importar-obras" class="btn-secondary">
@@ -222,13 +259,26 @@
     </div>
   </div>
 
-  <div class="table-container">
-    <div class="table-actions-header">
+  <!-- NOVA BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-obra-status">Status</label>
+      <select id="filter-obra-status"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-obra-base">Base da Obra</label>
+      <select id="filter-obra-base"></select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-obra">Busca por texto</label>
       <div class="search-container">
         <i class="ph ph-magnifying-glass"></i>
-        <input type="text" id="busca-obra" placeholder="Buscar por nº da obra, título...">
+        <input type="text" id="busca-obra" placeholder="Nº da obra, título...">
       </div>
     </div>
+  </div>
+
+  <div class="table-container">
     <table id="tabela-obras" class="data-table">
       <thead>
       <tr>
@@ -243,11 +293,10 @@
       <tbody></tbody>
     </table>
   </div>
-  <div id="empty-state-obras" class="empty-state">
-    <i class="ph ph-hard-hat"></i>
-    <h3>Nenhuma obra cadastrada</h3>
-    <p>Comece adicionando uma nova obra ou importando uma planilha.</p>
-  </div>
+  <div id="empty-state-obras" class="empty-state"></div>
+
+  <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-obras"></div>
 </template>
 
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->

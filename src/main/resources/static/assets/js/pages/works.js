@@ -2,12 +2,17 @@ import { updateMenuActiveState } from '../app.js';
 import { fetchAutenticado } from '../api.js';
 import { showNotification, showImportModal, showDrawer, closeDrawer } from '../components.js';
 
-let allWorks = []; // Cache da lista de obras
-let supportData = {}; // Cache para dados de dropdowns (status, bases)
+// Estado da página
+let allWorks = [];
+let supportData = {};
+let currentPage = 0;
+let itemsPerPage = 10;
+let currentFilters = {
+    statusId: '',
+    baseId: '',
+    searchTerm: ''
+};
 
-/**
- * Renderiza a página de obras.
- */
 export function renderWorksPage() {
     const pageContent = document.getElementById('page-content');
     const template = document.getElementById('template-works');
@@ -18,30 +23,31 @@ export function renderWorksPage() {
 
     updateMenuActiveState();
     setupWorksEventListeners();
-    loadSupportData().then(loadWorks);
+    loadSupportData().then(() => {
+        populateFilterDropdowns();
+        loadWorks();
+    });
 }
 
-/**
- * Configura os event listeners da página de obras.
- */
 function setupWorksEventListeners() {
+    // Ações principais
     document.getElementById('btn-nova-obra').addEventListener('click', () => showWorkForm());
     document.getElementById('btn-importar-obras').addEventListener('click', () => document.getElementById('input-arquivo-obras').click());
     document.getElementById('input-arquivo-obras').addEventListener('change', handleFileImport);
     document.querySelector('#tabela-obras tbody').addEventListener('click', handleTableActions);
-    document.getElementById('busca-obra').addEventListener('input', handleSearch);
+
+    // Filtros
+    document.getElementById('filter-obra-status').addEventListener('change', (e) => updateFilter('statusId', e.target.value));
+    document.getElementById('filter-obra-base').addEventListener('change', (e) => updateFilter('baseId', e.target.value));
+    document.getElementById('busca-obra').addEventListener('input', (e) => updateFilter('searchTerm', e.target.value));
 }
 
-/**
- * Carrega dados de suporte para os formulários (status, bases).
- */
 async function loadSupportData() {
     try {
         if (supportData.status && supportData.bases) return;
-        // CORREÇÃO: Ajuste nos endpoints para corresponder à API.
         const [statusRes, basesRes] = await Promise.all([
-            fetchAutenticado('/api/v1/status-obra'), // Assumindo que o endpoint para status é este
-            fetchAutenticado('/api/v1/bases-operacionais') // Assumindo que o endpoint para bases é este
+            fetchAutenticado('/api/v1/status-obra'),
+            fetchAutenticado('/api/v1/bases-operacionais')
         ]);
         if (!statusRes.ok || !basesRes.ok) throw new Error('Falha ao carregar dados de suporte.');
 
@@ -52,43 +58,60 @@ async function loadSupportData() {
     }
 }
 
-/**
- * Carrega as obras da API e renderiza a tabela.
- */
+function populateFilterDropdowns() {
+    const statusSelect = document.getElementById('filter-obra-status');
+    const baseSelect = document.getElementById('filter-obra-base');
+
+    statusSelect.innerHTML = '<option value="">Todos os Status</option>';
+    supportData.status?.forEach(s => statusSelect.add(new Option(s.nomeStatus, s.id)));
+
+    baseSelect.innerHTML = '<option value="">Todas as Bases</option>';
+    supportData.bases?.forEach(b => baseSelect.add(new Option(b.nomeBase, b.id)));
+}
+
+function updateFilter(key, value) {
+    currentPage = 0; // Reseta para a primeira página ao aplicar um filtro
+    currentFilters[key] = value;
+    loadWorks();
+}
+
 async function loadWorks() {
+    const params = new URLSearchParams({
+        page: currentPage,
+        size: itemsPerPage,
+        sort: 'id,desc' // Exemplo de ordenação
+    });
+
+    // Adiciona filtros à URL apenas se tiverem valor
+    Object.entries(currentFilters).forEach(([key, value]) => {
+        if (value) {
+            params.append(key, value);
+        }
+    });
+
     try {
-        const response = await fetchAutenticado('/api/v1/obras');
+        const response = await fetchAutenticado(`/api/v1/obras?${params.toString()}`);
         if (!response.ok) throw new Error('Falha ao carregar obras.');
 
-        const works = await response.json();
-        allWorks = works;
-        renderWorksTable(works);
+        const pageData = await response.json();
+        allWorks = pageData.content;
+        renderWorksTable(pageData.content);
+        renderPaginationControls(pageData);
     } catch (error) {
         showNotification(error.message, 'error');
     }
 }
 
-/**
- * Renderiza os dados na tabela de obras.
- */
 function renderWorksTable(works) {
     const tableBody = document.querySelector('#tabela-obras tbody');
     const emptyState = document.getElementById('empty-state-obras');
-    const tableContainer = document.querySelector('#page-content .table-container');
-
-    if (!tableBody || !emptyState || !tableContainer) {
-        console.error('Elementos da tabela de obras não encontrados no DOM.');
-        return;
-    }
-
     tableBody.innerHTML = '';
 
-    if (works.length === 0 && document.getElementById('busca-obra').value === '') {
+    if (works.length === 0) {
+        emptyState.innerHTML = `<i class="ph ph-magnifying-glass"></i><h3>Nenhum resultado encontrado</h3><p>Tente ajustar seus filtros ou cadastrar uma nova obra.</p>`;
         emptyState.style.display = 'flex';
-        tableContainer.style.display = 'none';
     } else {
         emptyState.style.display = 'none';
-        tableContainer.style.display = 'block';
         works.forEach(work => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -105,6 +128,65 @@ function renderWorksTable(works) {
             tableBody.appendChild(tr);
         });
     }
+}
+
+function renderPaginationControls(pageData) {
+    const container = document.getElementById('pagination-obras');
+    if (!container) return;
+
+    const { totalElements, totalPages, number: currentPageIndex, size, first, last } = pageData;
+
+    if (totalElements === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const startItem = currentPageIndex * size + 1;
+    const endItem = startItem + pageData.numberOfElements - 1;
+
+    container.innerHTML = `
+        <div class="pagination-summary">
+            Mostrando <strong>${startItem}</strong>-<strong>${endItem}</strong> de <strong>${totalElements}</strong>
+        </div>
+        <div class="pagination-size">
+            <label for="items-per-page">Itens por página:</label>
+            <select id="items-per-page">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+            </select>
+        </div>
+        <div class="pagination-nav">
+            <button class="btn-icon" id="prev-page" ${first ? 'disabled' : ''}><i class="ph ph-caret-left"></i></button>
+            <span class="page-info">Página ${currentPageIndex + 1} de ${totalPages}</span>
+            <button class="btn-icon" id="next-page" ${last ? 'disabled' : ''}><i class="ph ph-caret-right"></i></button>
+        </div>
+    `;
+
+    const itemsPerPageSelect = document.getElementById('items-per-page');
+    itemsPerPageSelect.value = itemsPerPage;
+
+    itemsPerPageSelect.addEventListener('change', (e) => {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 0;
+        loadWorks();
+    });
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (!first) {
+            currentPage--;
+            loadWorks();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (!last) {
+            currentPage++;
+            loadWorks();
+        }
+    });
 }
 
 /**

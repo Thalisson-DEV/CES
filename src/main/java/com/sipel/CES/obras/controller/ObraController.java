@@ -6,11 +6,13 @@ import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
 import com.sipel.CES.obras.DTO.ObraDTO;
 import com.sipel.CES.obras.service.ObraService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController
@@ -44,8 +46,12 @@ public class ObraController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ObraResponseDTO>> getAllObras() {
-        List<ObraResponseDTO> obras = obraService.getAllObras();
+    public ResponseEntity<Page<ObraResponseDTO>> getAllObras(
+            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Integer baseId,
+            @RequestParam(required = false) String searchTerm,
+            Pageable pageable) {
+        Page<ObraResponseDTO> obras = obraService.getAllObras(statusId, baseId, searchTerm, pageable);
         return ResponseEntity.ok(obras);
     }
 

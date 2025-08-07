@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                         // Materiais-API
                         .requestMatchers(HttpMethod.GET, "/api/v1/material").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/material").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/material/import").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
 
                         // Obras-API
                         .requestMatchers(HttpMethod.POST, "/api/v1/obras").hasAnyRole("ADMINISTRADOR", "COORDENADOR")

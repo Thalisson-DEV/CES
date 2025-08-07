@@ -1,8 +1,17 @@
 import { updateMenuActiveState } from '../app.js';
 import { fetchAutenticado } from '../api.js';
-import { showNotification, showDrawer, closeDrawer } from '../components.js';
+import { showNotification, showDrawer, closeDrawer, showImportModal } from '../components.js';
 
-let allMaterials = []; // Cache da lista de materiais
+// Estado da página
+let allMaterials = [];
+let currentPage = 0;
+let itemsPerPage = 10;
+let currentFilters = {
+    suprMatr: '',
+    avaliacao: '',
+    centro: '',
+    searchTerm: ''
+};
 
 /**
  * Renderiza a página de materiais.
@@ -17,29 +26,59 @@ export function renderMaterialsPage() {
 
     updateMenuActiveState();
     setupMaterialsEventListeners();
-    loadMaterials();
+    loadMaterials(); // Carrega os dados iniciais
 }
 
 /**
  * Configura os event listeners da página.
  */
 function setupMaterialsEventListeners() {
+    // Ações principais
     document.getElementById('btn-novo-material').addEventListener('click', () => showMaterialForm());
-    document.getElementById('busca-material').addEventListener('input', handleSearch);
+    document.getElementById('btn-importar-materiais').addEventListener('click', () => document.getElementById('input-arquivo-materiais').click());
+    document.getElementById('input-arquivo-materiais').addEventListener('change', handleFileImport);
     document.querySelector('#tabela-materiais tbody').addEventListener('click', handleTableActions);
+
+    // Filtros
+    document.getElementById('filter-material-tipo').addEventListener('change', (e) => updateFilter('suprMatr', e.target.value));
+    document.getElementById('filter-material-avaliacao').addEventListener('change', (e) => updateFilter('avaliacao', e.target.value));
+    document.getElementById('filter-material-centro').addEventListener('change', (e) => updateFilter('centro', e.target.value));
+    document.getElementById('busca-material').addEventListener('input', (e) => updateFilter('searchTerm', e.target.value));
 }
 
 /**
- * Carrega os materiais da API e renderiza a tabela.
+ * Atualiza um valor de filtro e recarrega os dados.
+ */
+function updateFilter(key, value) {
+    currentPage = 0; // Reseta para a primeira página ao aplicar um filtro
+    currentFilters[key] = value;
+    loadMaterials();
+}
+
+/**
+ * Carrega os materiais da API de forma paginada e com filtros.
  */
 async function loadMaterials() {
+    const params = new URLSearchParams({
+        page: currentPage,
+        size: itemsPerPage,
+        sort: 'id,desc'
+    });
+
+    Object.entries(currentFilters).forEach(([key, value]) => {
+        if (value) {
+            params.append(key, value);
+        }
+    });
+
     try {
-        const response = await fetchAutenticado('/api/v1/material');
+        const response = await fetchAutenticado(`/api/v1/material?${params.toString()}`);
         if (!response.ok) throw new Error('Falha ao carregar materiais.');
 
-        const materials = await response.json();
-        allMaterials = materials;
-        renderMaterialsTable(materials);
+        const pageData = await response.json();
+        allMaterials = pageData.content; // Armazena apenas os materiais da página atual
+        renderMaterialsTable(pageData.content);
+        renderPaginationControls(pageData);
     } catch (error) {
         showNotification(error.message, 'error');
     }
@@ -47,30 +86,19 @@ async function loadMaterials() {
 
 /**
  * Renderiza os dados na tabela de materiais.
- * @param {Array} materials - A lista de materiais a ser renderizada.
  */
 function renderMaterialsTable(materials) {
     const tableBody = document.querySelector('#tabela-materiais tbody');
     const emptyState = document.getElementById('empty-state-materiais');
-    const tableContainer = document.querySelector('#page-content .table-container');
-
-    if (!tableBody || !emptyState || !tableContainer) {
-        console.error('Elementos da tabela de materiais não encontrados no DOM.');
-        return;
-    }
-
     tableBody.innerHTML = '';
 
-    if (materials.length === 0 && document.getElementById('busca-material').value === '') {
+    if (materials.length === 0) {
+        emptyState.innerHTML = `<i class="ph ph-magnifying-glass"></i><h3>Nenhum resultado encontrado</h3><p>Tente ajustar seus filtros ou cadastrar um novo material.</p>`;
         emptyState.style.display = 'flex';
-        tableContainer.style.display = 'none';
     } else {
         emptyState.style.display = 'none';
-        tableContainer.style.display = 'block';
         materials.forEach(material => {
             const tr = document.createElement('tr');
-            // MELHORIA: Adicionada a coluna "Avaliação" na tabela.
-            // Lembre-se de adicionar o <th>Avaliação</th> no seu template HTML.
             tr.innerHTML = `
                 <td>${material.codigoMaterial}</td>
                 <td>${material.nomeMaterial}</td>
@@ -89,14 +117,74 @@ function renderMaterialsTable(materials) {
 }
 
 /**
- * Mostra o formulário de material dentro do painel lateral (drawer).
- * @param {object|null} material - O material para editar, ou null para criar um novo.
+ * Renderiza os controles de paginação.
  */
+function renderPaginationControls(pageData) {
+    const container = document.getElementById('pagination-materiais');
+    if (!container) return;
+
+    const { totalElements, totalPages, number: currentPageIndex, size, first, last } = pageData;
+
+    if (totalElements === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const startItem = currentPageIndex * size + 1;
+    const endItem = startItem + pageData.numberOfElements - 1;
+
+    container.innerHTML = `
+        <div class="pagination-summary">
+            Mostrando <strong>${startItem}</strong>-<strong>${endItem}</strong> de <strong>${totalElements}</strong>
+        </div>
+        <div class="pagination-size">
+            <label for="items-per-page-mat">Itens por página:</label>
+            <select id="items-per-page-mat">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+            </select>
+        </div>
+        <div class="pagination-nav">
+            <button class="btn-icon" id="prev-page-mat" ${first ? 'disabled' : ''}><i class="ph ph-caret-left"></i></button>
+            <span class="page-info">Página ${currentPageIndex + 1} de ${totalPages}</span>
+            <button class="btn-icon" id="next-page-mat" ${last ? 'disabled' : ''}><i class="ph ph-caret-right"></i></button>
+        </div>
+    `;
+
+    const itemsPerPageSelect = document.getElementById('items-per-page-mat');
+    itemsPerPageSelect.value = itemsPerPage;
+
+    itemsPerPageSelect.addEventListener('change', (e) => {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 0;
+        loadMaterials();
+    });
+
+    document.getElementById('prev-page-mat').addEventListener('click', () => {
+        if (!first) {
+            currentPage--;
+            loadMaterials();
+        }
+    });
+
+    document.getElementById('next-page-mat').addEventListener('click', () => {
+        if (!last) {
+            currentPage++;
+            loadMaterials();
+        }
+    });
+}
+
+// As funções abaixo (showMaterialForm, handleFormSubmit, handleFileImport, handleTableActions)
+// permanecem as mesmas da versão anterior, pois já estão corretas.
+
 function showMaterialForm(material = null) {
     const isEdit = material !== null;
     const title = isEdit ? 'Editar Material' : 'Novo Material';
 
-    // MELHORIA: Inputs de texto foram trocados por selects.
     const formBody = `
         <form id="form-material" class="drawer-form">
             <input type="hidden" id="material-id" value="${isEdit ? material.id : ''}">
@@ -137,7 +225,6 @@ function showMaterialForm(material = null) {
 
     showDrawer({ title, body: formBody, onSave: handleFormSubmit });
 
-    // Helper para popular os selects de forma mais limpa
     const populateSelect = (elementId, options, selectedValue) => {
         const select = document.getElementById(elementId);
         if (!select) return;
@@ -151,16 +238,12 @@ function showMaterialForm(material = null) {
         }
     };
 
-    // Popula todos os campos de seleção
     populateSelect('unidade-medida', ['UN', 'KG', 'M', 'M2', 'M3', 'L', 'CX', 'PC'], isEdit ? material.unidadeMedida : null);
     populateSelect('supr-matr', ['SUPR', 'MATR'], isEdit ? material.suprMatr : null);
     populateSelect('avaliacao', ['INVEST', 'MANUT', 'SUCATA', 'RECUP'], isEdit ? material.avaliacao : null);
     populateSelect('centro', ['610', '670'], isEdit ? material.centro : null);
 }
 
-/**
- * Lida com o envio do formulário de material (criar/editar).
- */
 async function handleFormSubmit() {
     const form = document.getElementById('form-material');
     if(!form) return;
@@ -178,7 +261,6 @@ async function handleFormSubmit() {
         centro: form.querySelector('#centro').value,
     };
 
-    // MELHORIA: Validação mais completa
     if (!materialData.codigoMaterial || !materialData.nomeMaterial || !materialData.unidadeMedida || !materialData.suprMatr || !materialData.avaliacao || !materialData.centro) {
         showNotification('Todos os campos com * são obrigatórios.', 'error');
         throw new Error('Validation failed');
@@ -215,24 +297,29 @@ async function handleFormSubmit() {
     }
 }
 
-/**
- * Lida com a busca na tabela.
- */
-function handleSearch(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredMaterials = allMaterials.filter(material =>
-        material.nomeMaterial?.toLowerCase().includes(searchTerm) ||
-        material.codigoMaterial?.toLowerCase().includes(searchTerm) ||
-        material.suprMatr?.toLowerCase().includes(searchTerm) ||
-        material.avaliacao?.toLowerCase().includes(searchTerm) ||
-        material.centro?.toLowerCase().includes(searchTerm)
-    );
-    renderMaterialsTable(filteredMaterials);
+async function handleFileImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    showNotification('Importando arquivo, por favor aguarde...', 'info');
+
+    try {
+        const response = await fetchAutenticado('/api/v1/material/import', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Erro na importação.');
+
+        showImportModal(result, 'Materiais');
+        loadMaterials();
+    } catch (error) {
+        showNotification(error.message, 'error');
+    } finally {
+        e.target.value = '';
+    }
 }
 
-/**
- * Lida com cliques nos botões de ação da tabela (editar/excluir).
- */
 async function handleTableActions(e) {
     const button = e.target.closest('button.btn-icon');
     if (!button) return;
@@ -240,9 +327,15 @@ async function handleTableActions(e) {
     const id = button.dataset.id;
 
     if (button.classList.contains('btn-edit')) {
-        const materialToEdit = allMaterials.find(m => m.id == id);
-        if (materialToEdit) {
+        // Para editar, precisamos buscar o material completo da API,
+        // pois a lista `allMaterials` só tem os itens da página atual.
+        try {
+            const response = await fetchAutenticado(`/api/v1/material/${id}`);
+            if (!response.ok) throw new Error('Falha ao buscar dados do material para edição.');
+            const materialToEdit = await response.json();
             showMaterialForm(materialToEdit);
+        } catch (error) {
+            showNotification(error.message, 'error');
         }
     }
 
