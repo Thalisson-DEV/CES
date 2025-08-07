@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CES - Gestão de Obras</title>
+
+  <!-- FONTES E ÍCONES -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- CAMINHO CORRIGIDO PARA O ARQUIVO CSS -->
+  <link rel="stylesheet" href="/assets/stylesheets/style.css">
+</head>
+<body>
+
+<!-- O contêiner principal da aplicação -->
+<div id="app">
+  <!-- O conteúdo será renderizado aqui pelo app.js -->
+</div>
+
+<!-- Contêiner para o painel de cadastro (Drawer) -->
+<div id="drawer-container"></div>
+
+
+<!-- =============================================================== -->
+<!-- ======================= TEMPLATES ============================= -->
+<!-- =============================================================== -->
+
+<!-- Template para a estrutura principal (Layout do Dashboard) -->
+<template id="template-main-app">
+  <div class="app-container">
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <nav class="sidebar">
+      <a href="#/dashboard" class="sidebar-logo">
+        <img src="https://placehold.co/40x40/111827/ffffff?text=S" alt="Logo Sipel">
+      </a>
+      <ul class="sidebar-menu">
+        <li data-tooltip="Dashboard">
+          <a href="#/dashboard" class="sidebar-link" data-menu="dashboard">
+            <i class="ph-bold ph-chart-pie-slice"></i>
+          </a>
+        </li>
+        <li data-tooltip="Cadastros">
+          <a href="#/materials" class="sidebar-link" data-menu="cadastros">
+            <i class="ph-bold ph-folder-plus"></i>
+          </a>
+        </li>
+        <li data-tooltip="Solicitações">
+          <a href="#/requests" class="sidebar-link" data-menu="solicitacoes">
+            <i class="ph-bold ph-file-text"></i>
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <div data-tooltip="Meu Perfil">
+          <a href="#" class="sidebar-link" id="btn-user-profile">
+            <i class="ph-bold ph-user-circle"></i>
+          </a>
+        </div>
+        <div data-tooltip="Sair">
+          <a href="#" class="sidebar-link" id="logoutButton">
+            <i class="ph-bold ph-sign-out"></i>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- PAINEL DO SUBMENU -->
+    <div class="submenu-panel">
+      <div id="submenu-dashboard" class="submenu-content">
+        <h3>Dashboard</h3>
+        <ul>
+          <li><a href="#/dashboard" class="page-link">Visão Geral</a></li>
+        </ul>
+      </div>
+      <div id="submenu-cadastros" class="submenu-content">
+        <h3>Cadastros</h3>
+        <ul>
+          <li><a href="#/materials" class="page-link">Materiais</a></li>
+          <li><a href="#/works" class="page-link">Obras</a></li>
+        </ul>
+      </div>
+      <div id="submenu-solicitacoes" class="submenu-content">
+        <h3>Solicitações</h3>
+        <ul>
+          <li><a href="#/requests/new" class="page-link">Nova Solicitação</a></li>
+          <li><a href="#/requests/list" class="page-link">Minhas Solicitações</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="search-bar">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" placeholder="Buscar por funcionalidades, materiais, obras...">
+        </div>
+      </header>
+      <section id="page-content" class="content-area">
+        <!-- O conteúdo da página será injetado aqui pelo roteador -->
+      </section>
+    </main>
+  </div>
+</template>
+
+<!-- Template da Página de Login -->
+<template id="template-login">
+  <main class="login-card">
+    <img src="https://placehold.co/50x50/0c29de/ffffff?text=S" alt="Logo da Empresa" class="logo">
+    <h1>Acesse a Plataforma</h1>
+    <p class="subtitle">Bem-vindo de volta! Insira suas credenciais.</p>
+    <form id="loginForm" novalidate>
+      <div class="input-group">
+        <label for="user">Usuário</label>
+        <input type="text" id="user" name="username" required value="admin">
+      </div>
+      <div class="input-group">
+        <label for="senhaHash">Senha</label>
+        <input type="password" id="senhaHash" name="senha" required value="password">
+      </div>
+      <div id="feedback" class="feedback" style="display: none;"></div>
+      <button type="submit" id="loginButton">Entrar</button>
+    </form>
+  </main>
+</template>
+
+<!-- Template da Página de Dashboard -->
+<template id="template-dashboard">
+  <div class="page-header">
+    <h1>Visão Geral</h1>
+    <p>Seja bem-vindo de volta, Usuário.</p>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><span>12</span>Solicitações Pendentes</div>
+    <div class="kpi-card"><span>4</span>Obras Ativas</div>
+    <div class="kpi-card"><span>8</span>Itens em Estoque Baixo</div>
+    <div class="kpi-card"><span>127</span>Atendimentos no Mês</div>
+  </div>
+  <div class="dashboard-grid">
+    <div class="quick-links-card">
+      <h2>Ações Rápidas</h2>
+      <ul>
+        <li><a href="#/requests/new"><i class="ph ph-plus-circle"></i> Criar Nova Solicitação</a></li>
+        <li><a href="#/materials"><i class="ph ph-magnifying-glass"></i> Buscar um Material</a></li>
+        <li><a href="#/works"><i class="ph ph-wrench"></i> Gerenciar Obras</a></li>
+      </ul>
+    </div>
+    <div class="updates-card">
+      <h2>Últimas Atualizações</h2>
+      <ul>
+        <li><strong>Versão 2.1.0 (UI/UX)</strong><p>Implementado painel lateral para cadastros e melhorias nos estilos de formulário.</p></li>
+        <li><strong>Versão 2.0.0 (SPA)</strong><p>Implementada arquitetura SPA e design unificado.</p></li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<!-- Template da Página de Materiais -->
+<template id="template-materials">
+  <div class="page-header">
+    <div>
+      <h1>Cadastro de Materiais</h1>
+      <p>Gerencie todos os materiais do seu estoque.</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-novo-material" class="btn-primary">
+        <i class="ph ph-plus"></i> Novo Material
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-actions-header">
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-material" placeholder="Buscar por código, nome, tipo...">
+      </div>
+    </div>
+    <table class="data-table" id="tabela-materiais">
+      <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nome</th>
+        <th>Unidade</th>
+        <th>Tipo</th>
+        <th>Centro</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-materiais" class="empty-state">
+    <i class="ph ph-package"></i>
+    <h3>Nenhum material encontrado</h3>
+    <p>Cadastre o primeiro material para começar a gerenciar seu estoque.</p>
+  </div>
+</template>
+
+<!-- Template da Página de Obras -->
+<template id="template-works">
+  <div class="page-header">
+    <div>
+      <h1>Cadastro de Obras</h1>
+      <p>Gerencie os projetos e obras da empresa.</p>
+    </div>
+    <div class="header-actions">
+      <a href="#" download class="btn-secondary" id="btn-download-modelo-obras">
+        <i class="ph ph-download-simple"></i> Baixar Modelo
+      </a>
+      <button id="btn-importar-obras" class="btn-secondary">
+        <i class="ph ph-upload-simple"></i> Importar
+      </button>
+      <button id="btn-nova-obra" class="btn-primary">
+        <i class="ph ph-plus"></i> Nova Obra
+      </button>
+      <input type="file" id="input-arquivo-obras" accept=".xlsx, .xls" style="display: none;">
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-actions-header">
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-obra" placeholder="Buscar por nº da obra, título...">
+      </div>
+    </div>
+    <table id="tabela-obras" class="data-table">
+      <thead>
+      <tr>
+        <th>Nº da Obra</th>
+        <th>Título</th>
+        <th>Status</th>
+        <th>Base da Obra</th>
+        <th>Início</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-obras" class="empty-state">
+    <i class="ph ph-hard-hat"></i>
+    <h3>Nenhuma obra cadastrada</h3>
+    <p>Comece adicionando uma nova obra ou importando uma planilha.</p>
+  </div>
+</template>
+
+<!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->
+<template id="template-drawer">
+  <div class="drawer-overlay"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <h2 id="drawer-title"></h2>
+      <button class="btn-icon" id="btn-close-drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <!-- O formulário será injetado aqui -->
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-secondary" id="btn-cancel-drawer">Cancelar</button>
+      <button class="btn-primary" id="btn-save-drawer">Salvar</button>
+    </div>
+  </div>
+</template>
+
+<!-- =============================================================== -->
+<!-- ========================= MODAIS ============================== -->
+<!-- =============================================================== -->
+
+<!-- Contêiner para MODAL DE NOTIFICAÇÃO (Toast) -->
+<div id="notification-toast-container" class="toast-container"></div>
+
+<!-- MODAL DE PERFIL DO USUÁRIO -->
+<div id="user-profile-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Meu Perfil</h2>
+      <button class="btn-icon btn-close-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="profile-form">
+        <div class="form-group">
+          <label for="profile-name">Nome</label>
+          <input type="text" id="profile-name" value="Alexandre" required>
+        </div>
+        <div class="form-group">
+          <label for="profile-email">Email</label>
+          <input type="email" id="profile-email" value="alexandre@sipel.com.br" required>
+        </div>
+        <hr class="form-divider">
+        <p class="form-section-title">Alterar Senha</p>
+        <div class="form-group">
+          <label for="profile-current-password">Senha Atual</label>
+          <input type="password" id="profile-current-password" placeholder="Deixe em branco para não alterar">
+        </div>
+        <div class="form-group">
+          <label for="profile-new-password">Nova Senha</label>
+          <input type="password" id="profile-new-password">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary btn-close-modal">Cancelar</button>
+      <button type="submit" form="profile-form" class="btn-primary">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE IMPORTAÇÃO (Genérico) -->
+<div id="import-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="import-modal-title">Resultado da Importação</h2>
+      <button class="btn-icon btn-close-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-summary">
+        <div class="summary-item success">
+          <i class="ph ph-check-circle"></i>
+          <div>
+            <span id="import-sucesso">0</span>
+            <p>Registros importados</p>
+          </div>
+        </div>
+        <div class="summary-item error">
+          <i class="ph ph-x-circle"></i>
+          <div>
+            <span id="import-falhas">0</span>
+            <p>Registros com falha</p>
+          </div>
+        </div>
+      </div>
+      <div id="import-erros-container" style="display: none;">
+        <strong>Detalhes dos Erros:</strong>
+        <ul id="import-erros-lista" class="error-list"></ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary btn-close-modal">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAMINHO CORRIGIDO PARA O SCRIPT PRINCIPAL -->
+<script type="module" src="/assets/js/app.js"></script>
+</body>
+</html>

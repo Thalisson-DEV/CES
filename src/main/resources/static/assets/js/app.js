@@ -1,99 +1,160 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- SELETORES DE ELEMENTOS ---
+// CAMINHOS DE IMPORT CORRIGIDOS
+import { renderLoginPage } from './pages/login.js';
+import { renderDashboardPage } from './pages/dashboard.js';
+import { renderMaterialsPage } from './pages/materiais.js';
+import { renderWorksPage } from './pages/works.js';
+import { showUserProfileModal, closeAllModals } from './components.js';
+
+// Mapeamento de rotas para as funções que renderizam cada página
+const routes = {
+    '/': renderLoginPage,
+    '/login': renderLoginPage,
+    '/dashboard': renderDashboardPage,
+    '/materials': renderMaterialsPage,
+    '/works': renderWorksPage
+};
+
+/**
+ * Função principal do roteador.
+ * Lê a hash da URL e renderiza a página correspondente.
+ */
+const router = () => {
+    // Pega a hash da URL (ex: #/dashboard) ou vai para a raiz se não houver
+    const path = window.location.hash.slice(1) || '/';
+
+    // Verifica se o usuário está tentando acessar uma página protegida sem token
+    const token = localStorage.getItem('jwt_token');
+    if (!token && path !== '/login' && path !== '/') {
+        window.location.hash = '/login';
+        return;
+    }
+
+    // Se o usuário tem token e está na página de login, redireciona para o dashboard
+    if (token && (path === '/login' || path === '/')) {
+        window.location.hash = '/dashboard';
+        return;
+    }
+
+    // Encontra a função correspondente à rota
+    const renderFunction = routes[path] || routes['/dashboard']; // Rota padrão
+
+    // Limpa modais abertos ao navegar
+    closeAllModals();
+
+    // Renderiza a página
+    renderFunction();
+};
+
+/**
+ * Configura o layout principal da aplicação (sidebar, submenu, etc.)
+ * Esta função é chamada apenas uma vez, após o login.
+ */
+export function setupMainAppLayout() {
+    const appDiv = document.getElementById('app');
+    const mainAppTemplate = document.getElementById('template-main-app');
+    appDiv.innerHTML = ''; // Limpa o conteúdo (página de login)
+    appDiv.appendChild(mainAppTemplate.content.cloneNode(true));
+
+    // --- LÓGICA DO MENU E SUBMENU ---
     const appContainer = document.querySelector('.app-container');
     const sidebarLinks = document.querySelectorAll('.sidebar-link');
     const submenuContents = document.querySelectorAll('.submenu-content');
-    const pageLinks = document.querySelectorAll('.page-link');
-    const pages = document.querySelectorAll('.page');
-    const logoutButton = document.getElementById('logoutButton');
 
-    // --- LÓGICA DO MENU LATERAL ---
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const submenuId = link.dataset.submenu;
+            const menuId = link.dataset.menu;
+            if (!menuId) return; // Ignora links sem data-menu (logout, profile)
 
-            // Se o link não for de submenu (como o de logout), não faz nada aqui
-            if (!submenuId) return;
+            // Previne a navegação padrão apenas se for um link de menu
+            if (link.getAttribute('href').startsWith('#')) {
+                e.preventDefault();
+            }
 
-            // Se o submenu clicado já está ativo, fecha o menu
+            // Se o menu clicado já está ativo, fecha o submenu
             if (link.classList.contains('active') && appContainer.classList.contains('submenu-open')) {
                 appContainer.classList.remove('submenu-open');
                 link.classList.remove('active');
             } else {
-                // Remove 'active' de todos os links e submenus
                 sidebarLinks.forEach(l => l.classList.remove('active'));
                 submenuContents.forEach(s => s.classList.remove('active'));
 
-                // Ativa o link e o submenu corretos
                 link.classList.add('active');
-                document.getElementById(`submenu-${submenuId}`).classList.add('active');
-                appContainer.classList.add('submenu-open');
+                const submenu = document.getElementById(`submenu-${menuId}`);
+                if (submenu) {
+                    submenu.classList.add('active');
+                    appContainer.classList.add('submenu-open');
+                } else {
+                    appContainer.classList.remove('submenu-open');
+                }
+            }
+            // Navega para a URL do link
+            const targetUrl = link.getAttribute('href');
+            if (targetUrl && targetUrl.startsWith('#')) {
+                window.location.hash = targetUrl.substring(1);
             }
         });
     });
 
-    // --- LÓGICA DE NAVEGAÇÃO (TROCA DE PÁGINAS) ---
-    function showPage(pageId) {
-        pages.forEach(page => page.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-    }
-
-    pageLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.dataset.page;
-            showPage(pageId);
-        });
-    });
-
-    // --- LÓGICA DE LOGOUT ---
-    logoutButton.addEventListener('click', (e) => {
+    // --- LÓGICA DOS BOTÕES GLOBAIS ---
+    document.getElementById('logoutButton').addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('jwt_token');
-        window.location.href = '/login.html';
+        window.location.hash = '/login';
     });
 
-    // --- LÓGICA DO DASHBOARD (CARREGAR DADOS INICIAIS) ---
-    async function loadDashboardData() {
-        try {
-            // Exemplo: Buscaria os dados dos KPIs da sua API
-            // const response = await fetchAutenticado('/api/v1/dashboard/stats', { method: 'GET' });
-            // const data = await response.json();
+    document.getElementById('btn-user-profile').addEventListener('click', (e) => {
+        e.preventDefault();
+        showUserProfileModal();
+    });
 
-            // Usando dados de exemplo por enquanto
-            document.getElementById('kpi-solicitacoes-pendentes').textContent = '12';
-            document.getElementById('kpi-obras-ativas').textContent = '4';
-            document.getElementById('kpi-itens-estoque-baixo').textContent = '8';
+    // Atualiza o estado do menu ao carregar a página
+    updateMenuActiveState();
+}
 
-        } catch (error) {
-            console.error("Erro ao carregar dados do dashboard:", error);
-            // Poderia mostrar uma mensagem de erro na tela
+/**
+ * Atualiza o estado visual (ativo/inativo) do menu e submenu
+ * com base na rota atual.
+ */
+export function updateMenuActiveState() {
+    const path = window.location.hash; // Pega a hash completa, ex: #/materials
+    const appContainer = document.querySelector('.app-container');
+    if (!appContainer) return; // Sai se o layout principal não estiver renderizado
+
+    const sidebarLinks = document.querySelectorAll('.sidebar-link[data-menu]');
+    const pageLinks = document.querySelectorAll('.submenu-content a');
+
+    let activeMenu = null;
+
+    // Ativa o link do submenu
+    pageLinks.forEach(link => {
+        if (link.getAttribute('href') === path) {
+            link.classList.add('active');
+            // Encontra o menu pai
+            activeMenu = link.closest('.submenu-content').id.split('-')[1];
+        } else {
+            link.classList.remove('active');
         }
-    }
+    });
 
-    // Carrega a página inicial e os dados
-    showPage('page-dashboard');
-    loadDashboardData();
-
-    // --- LÓGICA DE INICIALIZAÇÃO ---
-    function initializeApp() {
-        // Encontra o link do sidebar e o conteúdo do submenu do dashboard
-        const dashboardSidebarLink = document.querySelector('.sidebar-link[data-submenu="dashboard"]');
-        const dashboardSubmenuContent = document.getElementById('submenu-dashboard');
-
-        // Define o estado inicial como se o usuário tivesse clicado no ícone do dashboard
-        if (dashboardSidebarLink && dashboardSubmenuContent) {
-            appContainer.classList.add('submenu-open'); // Expande o painel
-            dashboardSidebarLink.classList.add('active'); // Ativa o ícone
-            dashboardSubmenuContent.classList.add('active'); // Mostra o conteúdo do submenu
+    // Ativa o ícone da sidebar
+    sidebarLinks.forEach(link => {
+        if (link.dataset.menu === activeMenu) {
+            link.classList.add('active');
+            appContainer.classList.add('submenu-open');
+        } else {
+            link.classList.remove('active');
         }
+    });
 
-        // Carrega a página inicial e os dados
-        showPage('page-dashboard');
-        loadDashboardData();
+    // Caso especial: Dashboard
+    if (path === '#/dashboard' || path === '#/') {
+        const dashboardLink = document.querySelector('.sidebar-link[data-menu="dashboard"]');
+        if(dashboardLink) dashboardLink.classList.add('active');
+        appContainer.classList.remove('submenu-open');
     }
+}
 
-    // Chama a função de inicialização
-    initializeApp();
-});
+
+// Adiciona os event listeners para o roteador
+window.addEventListener('hashchange', router);
+window.addEventListener('DOMContentLoaded', router);

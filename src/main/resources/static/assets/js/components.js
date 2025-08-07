@@ -1,154 +1,161 @@
 /**
- * Componentes reutilizáveis para a aplicação
+ * Mostra uma notificação (toast) na tela.
+ * @param {string} message - A mensagem a ser exibida.
+ * @param {string} type - O tipo de notificação ('success', 'error', 'info').
  */
+export function showNotification(message, type = 'success') {
+    const container = document.getElementById('notification-toast-container');
+    if (!container) return;
 
-// Função para mostrar mensagens de feedback
-const mostrarMensagem = (texto, tipo = 'sucesso') => {
-    // Remove qualquer mensagem existente
-    const mensagensExistentes = document.querySelectorAll('.mensagem');
-    mensagensExistentes.forEach(m => m.remove());
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
 
-    // Cria a nova mensagem
-    const el = document.createElement('div');
-    el.className = `mensagem ${tipo}`;
-    el.textContent = texto;
+    const iconClass = {
+        success: 'ph-check-circle',
+        error: 'ph-x-circle',
+        info: 'ph-info'
+    }[type];
 
-    // Adiciona ícone
-    const icone = document.createElement('span');
-    icone.className = 'mensagem-icone';
-    if (tipo === 'sucesso') {
-        icone.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>';
-    } else {
-        icone.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>';
-    }
-    el.prepend(icone);
-
-    // Adiciona a mensagem ao body
-    document.body.appendChild(el);
-
-    // Adiciona a classe para mostrar com animação
-    setTimeout(() => el.classList.add('visivel'), 10);
-
-    // Remove após o tempo definido
-    setTimeout(() => {
-        el.classList.remove('visivel');
-        setTimeout(() => el.remove(), 300);
-    }, 4000);
-};
-
-// Fetch autenticado com token JWT
-const fetchAutenticado = async (url, options = {}) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/login.html';
-        return null;
-    }
-
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    };
-
-    // Se estamos enviando um FormData, não definimos o Content-Type
-    if (options.body instanceof FormData) {
-        delete defaultOptions.headers['Content-Type'];
-    }
-
-    const mergedOptions = {
-        ...defaultOptions,
-        ...options,
-        headers: {
-            ...defaultOptions.headers,
-            ...options.headers
-        }
-    };
-
-    try {
-        const response = await fetch(url, mergedOptions);
-
-        // Se a resposta for 401 ou 403, redireciona para login
-        if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('token');
-            window.location.href = '/login.html';
-            return null;
-        }
-
-        return response;
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-        mostrarMensagem('Erro na comunicação com o servidor. Tente novamente.', 'erro');
-        throw error;
-    }
-};
-
-// Formatar data para dd/mm/yyyy
-const formatarData = (dataString) => {
-    if (!dataString) return 'N/A';
-
-    const data = new Date(dataString);
-    if (isNaN(data.getTime())) return 'Data inválida';
-
-    return data.toLocaleDateString('pt-BR');
-};
-
-// Adicionar CSS para as mensagens
-const adicionarEstilosMensagem = () => {
-    // Verifica se o estilo já existe
-    if (document.getElementById('mensagem-estilos')) return;
-
-    const estilos = document.createElement('style');
-    estilos.id = 'mensagem-estilos';
-    estilos.innerHTML = `
-        .mensagem {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 16px;
-            background-color: #10b981; /* Verde para sucesso */
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            max-width: 350px;
-            z-index: 1100;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-
-        .mensagem.visivel {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .mensagem.erro {
-            background-color: #ef4444; /* Vermelho para erro */
-        }
-
-        .mensagem-icone {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .mensagem-icone svg {
-            width: 100%;
-            height: 100%;
-        }
+    toast.innerHTML = `
+        <i class="toast-icon ph ${iconClass}"></i>
+        <div class="toast-message">${message}</div>
     `;
 
-    document.head.appendChild(estilos);
-};
+    container.appendChild(toast);
 
-// Inicializa os estilos de mensagens quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', adicionarEstilosMensagem);
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
 
-// Exporta as funções para uso global
-window.mostrarMensagem = mostrarMensagem;
-window.fetchAutenticado = fetchAutenticado;
-window.formatarData = formatarData;
+/**
+ * Fecha todos os modais visíveis.
+ */
+export function closeAllModals() {
+    document.querySelectorAll('.modal-overlay.visible').forEach(modal => {
+        modal.classList.remove('visible');
+    });
+}
+
+function setupModalCloseListeners(modal) {
+    if (!modal) return;
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('visible');
+        }
+    });
+    modal.querySelectorAll('.btn-close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.remove('visible');
+        });
+    });
+}
+
+export function showUserProfileModal() {
+    const modal = document.getElementById('user-profile-modal');
+    if (!modal) return;
+
+    setupModalCloseListeners(modal);
+    modal.classList.add('visible');
+
+    const form = modal.querySelector('#profile-form');
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        showNotification('Perfil atualizado com sucesso!', 'success');
+        closeAllModals();
+    };
+}
+
+export function showImportModal(result, entityName = 'Itens') {
+    const modal = document.getElementById('import-modal');
+    if (!modal) return;
+
+    modal.querySelector('#import-modal-title').textContent = `Resultado da Importação de ${entityName}`;
+    modal.querySelector('#import-sucesso').textContent = result.sucessos || 0;
+    modal.querySelector('#import-falhas').textContent = result.falhas || 0;
+
+    const errosContainer = modal.querySelector('#import-erros-container');
+    const errosLista = modal.querySelector('#import-erros-lista');
+
+    if (result.erros && result.erros.length > 0) {
+        errosContainer.style.display = 'block';
+        errosLista.innerHTML = '';
+        result.erros.forEach(erro => {
+            const li = document.createElement('li');
+            li.textContent = erro;
+            errosLista.appendChild(li);
+        });
+    } else {
+        errosContainer.style.display = 'none';
+    }
+
+    setupModalCloseListeners(modal);
+    modal.classList.add('visible');
+}
+
+
+/**
+ * NOVO: Gerenciador do Painel Lateral (Drawer)
+ */
+export function showDrawer({ title, body, onSave }) {
+    const container = document.getElementById('drawer-container');
+    const template = document.getElementById('template-drawer');
+    if (!container || !template) return;
+
+    container.innerHTML = ''; // Limpa qualquer drawer anterior
+    container.appendChild(template.content.cloneNode(true));
+
+    const drawerPanel = container.querySelector('.drawer-panel');
+    const drawerOverlay = container.querySelector('.drawer-overlay');
+    const drawerTitle = container.querySelector('#drawer-title');
+    const drawerBody = container.querySelector('#drawer-body');
+    const btnSave = container.querySelector('#btn-save-drawer');
+    const btnCancel = container.querySelector('#btn-cancel-drawer');
+    const btnClose = container.querySelector('#btn-close-drawer');
+
+    drawerTitle.textContent = title;
+    drawerBody.innerHTML = body;
+
+    const closeDrawer = () => {
+        drawerPanel.classList.remove('visible');
+        drawerOverlay.classList.remove('visible');
+        // Remove o drawer do DOM após a animação para limpar os eventos
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 300);
+    };
+
+    // Adiciona os eventos
+    btnSave.onclick = async () => {
+        btnSave.disabled = true;
+        btnSave.textContent = 'Salvando...';
+        try {
+            await onSave(); // Chama a função de salvar passada como parâmetro
+        } finally {
+            btnSave.disabled = false;
+            btnSave.textContent = 'Salvar';
+        }
+    };
+    btnCancel.onclick = closeDrawer;
+    btnClose.onclick = closeDrawer;
+    drawerOverlay.onclick = closeDrawer;
+
+    // Mostra o drawer
+    setTimeout(() => {
+        drawerPanel.classList.add('visible');
+        drawerOverlay.classList.add('visible');
+    }, 10); // Pequeno delay para garantir que a transição CSS funcione
+}
+
+export function closeDrawer() {
+    const container = document.getElementById('drawer-container');
+    const drawerPanel = container.querySelector('.drawer-panel');
+    const drawerOverlay = container.querySelector('.drawer-overlay');
+    if (drawerPanel && drawerOverlay) {
+        drawerPanel.classList.remove('visible');
+        drawerOverlay.classList.remove('visible');
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 300);
+    }
+}
