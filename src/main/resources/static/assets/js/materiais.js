@@ -194,13 +194,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Filtra a tabela de materiais com base no texto da busca
-    const handleBusca = (event) => {
-        const termoBusca = event.target.value.toLowerCase();
+    const handleBusca = () => {
+        const termoBusca = buscaInput.value.toLowerCase().trim();
+        if (!termoBusca) {
+            renderizarTabela(allMaterials);
+            return;
+        }
+
         const materiaisFiltrados = allMaterials.filter(material =>
-            material.nomeMaterial.toLowerCase().includes(termoBusca) ||
-            material.codigoMaterial.toLowerCase().includes(termoBusca)
+            material.nomeMaterial?.toLowerCase().includes(termoBusca) ||
+            material.codigoMaterial?.toLowerCase().includes(termoBusca) ||
+            material.suprMatr?.toLowerCase().includes(termoBusca) ||
+            material.centro?.toLowerCase().includes(termoBusca)
         );
+
         renderizarTabela(materiaisFiltrados);
+
+        if (materiaisFiltrados.length === 0) {
+            mostrarMensagem(`Nenhum material encontrado com o termo "${buscaInput.value}"`, 'erro');
+        } else {
+            mostrarMensagem(`${materiaisFiltrados.length} material(is) encontrado(s)`);
+        }
     };
 
     // --- EVENT LISTENERS (Conectando as ações aos elementos) ---
@@ -210,7 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancelar.addEventListener('click', esconderFormulario);
     materialForm.addEventListener('submit', handleFormSubmit);
     tabelaBody.addEventListener('click', handleTableActions);
-    buscaInput.addEventListener('input', handleBusca);
+
+    // Novo comportamento de busca
+    const btnBuscarMaterial = document.getElementById('btn-buscar-material');
+    btnBuscarMaterial.addEventListener('click', handleBusca);
+    buscaInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleBusca();
+        }
+    });
 
     // --- INICIALIZAÇÃO ---
     // Carrega a lista de materiais assim que a página é carregada.

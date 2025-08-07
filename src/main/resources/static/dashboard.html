@@ -8,6 +8,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="assets/stylesheets/style.css">
     <link rel="stylesheet" href="assets/stylesheets/materiais.css">
+    <link rel="stylesheet" href="assets/stylesheets/obras.css">
 
     <!-- FONTES E ÍCONES -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -197,9 +198,10 @@
                         <div class="search-container">
                             <i class="ph ph-magnifying-glass"></i>
                             <input type="text" id="busca-material" placeholder="Buscar material...">
+                            <button class="btn-buscar" id="btn-buscar-material">Buscar</button>
                         </div>
                     </div>
-                    <table id="tabela-materiais" class="data-table">
+                    <table class="data-table" id="tabela-materiais">
                         <thead>
                         <tr>
                             <th>Código</th>
@@ -223,13 +225,90 @@
                     </div>
                 </div>
             </div>
+
+            <!-- PÁGINA: CADASTRO DE OBRAS (ESTRUTURA COMPLETA) -->
+            <div id="page-obras" class="page">
+                <div class="page-header">
+                    <h1>Cadastro de Obras</h1>
+                    <p>Gerencie os projetos e obras da empresa.</p>
+                    <div class="header-actions">
+                        <a href="/assets/templates/modelo_obras.xlsx" download class="btn-secondary">Baixar Modelo</a>
+                        <button id="btn-importar-obras" class="btn-secondary">Importar</button>
+                        <button id="btn-nova-obra" class="btn-primary">Nova Obra</button>
+                        <input type="file" id="input-arquivo-obras" accept=".xlsx" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Formulário de Cadastro/Edição Individual -->
+                <div id="form-obra-container" class="form-container" style="display: none;">
+                    <div class="form-header">
+                        <h2 id="form-obra-title">Nova Obra</h2>
+                        <button id="btn-fechar-form-obra" class="btn-icon">&times;</button>
+                    </div>
+                    <form id="form-obra">
+                        <input type="hidden" id="obra-id">
+                        <div class="form-row">
+                            <div class="form-group"><label for="numero-obra">Nº da Obra*</label><input type="text" id="numero-obra" required></div>
+                            <div class="form-group"><label for="titulo-obra">Título*</label><input type="text" id="titulo-obra" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="status-obra">Status*</label><select id="status-obra" required></select></div>
+                            <div class="form-group"><label for="base-obra">Base da Obra*</label><select id="base-obra" required></select></div>
+                            <div class="form-group"><label for="base-saque">Base de Saque*</label><select id="base-saque" required></select></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="data-inicio">Data de Início</label><input type="date" id="data-inicio"></div>
+                            <div class="form-group"><label for="data-fim">Data de Fim</label><input type="date" id="data-fim"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="latitude-obra">Latitude</label><input type="text" id="latitude-obra"></div>
+                            <div class="form-group"><label for="longitude-obra">Longitude</label><input type="text" id="longitude-obra"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="btn-cancelar-obra" class="btn-secondary">Cancelar</button>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabela de Obras -->
+                <div class="table-container">
+                    <table id="tabela-obras" class="data-table">
+                        <thead><tr><th>Nº da Obra</th><th>Título</th><th>Status</th><th>Base da Obra</th><th>Início</th><th>Ações</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="sem-obras" class="empty-state" style="display: none;">
+                        <p>Nenhuma obra cadastrada.</p>
+                        <button id="btn-nova-obra-empty" class="btn-primary">Adicionar Obra</button>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
+</div>
+
+<!-- MODAL DE IMPORTAÇÃO -->
+<div id="import-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Resultado da Importação</h2>
+            <button id="btn-fechar-modal" class="btn-icon">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Sucesso:</strong> <span id="import-sucesso">0</span></p>
+            <p><strong>Falhas:</strong> <span id="import-falhas">0</span></p>
+            <div id="import-erros-container" style="display: none;">
+                <strong>Detalhes dos Erros:</strong>
+                <ul id="import-erros-lista"></ul>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- SCRIPTS JS -->
 <script src="assets/js/api.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="assets/js/materiais.js"></script>
+<script src="assets/js/obras.js"></script>
 </body>
 </html>

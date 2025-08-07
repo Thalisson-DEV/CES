@@ -1,6 +1,6 @@
 package com.sipel.CES.infra.security;
 
-import com.sipel.CES.repositories.UsuarioRepository;
+import com.sipel.CES.users.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -4,6 +4,7 @@ const API_BASE_URL = 'http://localhost:8080'; // Centraliza a URL base da sua AP
  * Uma função que "empacota" a API fetch para automaticamente:
  * 1. Adicionar o token JWT no cabeçalho de autorização.
  * 2. Tratar erros de autenticação (401/403) e redirecionar para o login.
+ * 3. Lidar corretamente com o Content-Type para JSON e Uploads de Arquivo.
  * @param {string} endpoint O endpoint da API para chamar (ex: '/api/v1/materiais').
  * @param {object} options As opções do fetch (method, body, etc.).
  * @returns {Promise<Response>} A promessa da resposta do fetch.
@@ -20,13 +21,22 @@ async function fetchAutenticado(endpoint, options = {}) {
         throw new Error('Usuário não autenticado.');
     }
 
-    // Prepara os cabeçalhos (headers)
+    // Prepara os cabeçalhos (headers) iniciais
     const headers = {
-        'Content-Type': 'application/json',
-        // Adiciona o cabeçalho de autorização com o token
         'Authorization': 'Bearer ' + token,
         ...options.headers // Permite adicionar outros headers se necessário
     };
+
+    // --- CORREÇÃO PARA UPLOAD DE ARQUIVO ---
+    // Verifica se o corpo da requisição é um FormData (usado para uploads).
+    if (options.body instanceof FormData) {
+        // Se for um FormData, NÃO definimos o 'Content-Type'.
+        // O navegador fará isso automaticamente com o 'boundary' correto.
+        // Se definirmos manualmente, a requisição falhará.
+    } else {
+        // Para todas as outras requisições (com corpo JSON), definimos o cabeçalho.
+        headers['Content-Type'] = 'application/json';
+    }
 
     // Monta a requisição completa
     const requestOptions = {
