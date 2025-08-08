@@ -2,6 +2,7 @@ import { renderLoginPage } from './pages/login.js';
 import { renderDashboardPage } from './pages/dashboard.js';
 import { renderMaterialsPage } from './pages/materiais.js';
 import { renderWorksPage } from './pages/works.js';
+import { renderForemenPage } from './pages/foremen.js';
 import { showUserProfileModal, closeAllModals } from './components.js';
 
 // Mapeamento de rotas para as funções que renderizam cada página
@@ -11,6 +12,7 @@ const routes = {
     '/dashboard': renderDashboardPage,
     '/materials': renderMaterialsPage,
     '/works': renderWorksPage,
+    '/foremen': renderForemenPage,
 };
 
 /**

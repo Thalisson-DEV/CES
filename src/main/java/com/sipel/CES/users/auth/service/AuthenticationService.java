@@ -1,5 +1,6 @@
 package com.sipel.CES.users.auth.service;
 
+import com.sipel.CES.users.auth.exceptions.NoUserInLocalMemoryException;
 import com.sipel.CES.users.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,14 @@ public class AuthenticationService implements UserDetailsService {
     UsuarioRepository repository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findByUsername(username);
+        try {
+            if (username == null) {
+                throw new NoUserInLocalMemoryException("Usuario não encontrado no banco de dados.");
+            }
+            return repository.findByUsername(username);
+        } catch (NullPointerException e) {
+            throw e;
+        }
+
     }
 }

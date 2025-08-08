@@ -93,11 +93,9 @@ public class ObraService {
 
     public ImportacaoResponseDTO importarObras(MultipartFile file) {
         if (file.isEmpty()) {
-            System.out.println("DEBUG: O arquivo enviado está vazio.");
             throw new RuntimeException("O arquivo enviado está vazio.");
         }
 
-        System.out.println("DEBUG: Iniciando processamento do arquivo: " + file.getOriginalFilename());
         List<Obra> obrasParaSalvar = new ArrayList<>();
         List<String> erros = new ArrayList<>();
         int linhaAtual = 1;
@@ -121,7 +119,6 @@ public class ObraService {
 
                 try {
                     String numeroObra = getStringCellValue(currentRow.getCell(0));
-                    System.out.println("DEBUG: Lendo linha " + linhaAtual + " para a obra: " + numeroObra);
                     String titulo = getStringCellValue(currentRow.getCell(1));
                     String statusNome = getStringCellValue(currentRow.getCell(2));
                     String baseObraNome = getStringCellValue(currentRow.getCell(3));
@@ -162,16 +159,13 @@ public class ObraService {
                     novaObra.setAtivo(true);
 
                     obrasParaSalvar.add(novaObra);
-                    System.out.println("DEBUG: Linha " + linhaAtual + " validada com sucesso.");
 
                 } catch (Exception e) {
-                    System.out.println("DEBUG: ERRO na linha " + linhaAtual + ": " + e.getMessage());
                     erros.add("Linha " + linhaAtual + ": " + e.getMessage());
                 }
             }
             workbook.close();
         } catch (Exception e) {
-            System.out.println("DEBUG: Falha crítica ao ler o arquivo: " + e.getMessage());
             throw new RuntimeException("Falha ao ler o arquivo Excel: " + e.getMessage());
         }
 
@@ -179,7 +173,6 @@ public class ObraService {
             repository.saveAll(obrasParaSalvar);
         }
 
-        System.out.println("DEBUG: Processamento finalizado. Sucessos: " + obrasParaSalvar.size() + ", Falhas: " + erros.size());
         return new ImportacaoResponseDTO(obrasParaSalvar.size(), erros.size(), erros);
     }
 

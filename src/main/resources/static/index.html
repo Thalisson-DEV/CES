@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CES - Gestão de Obras</title>
+  <title>SparkObras</title>
 
   <!-- FONTES E ÍCONES -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,6 +81,7 @@
         <ul>
           <li><a href="#/materials" class="page-link">Materiais</a></li>
           <li><a href="#/works" class="page-link">Obras</a></li>
+          <li><a href="#/foremen" class="page-link">Encarregados</a></li>
         </ul>
       </div>
       <div id="submenu-solicitacoes" class="submenu-content">
@@ -210,7 +211,6 @@
     <div class="filter-group search">
       <label for="busca-material">Busca por texto</label>
       <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="busca-material" placeholder="Código, nome...">
       </div>
     </div>
@@ -272,7 +272,6 @@
     <div class="filter-group search">
       <label for="busca-obra">Busca por texto</label>
       <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="busca-obra" placeholder="Nº da obra, título...">
       </div>
     </div>
@@ -294,6 +293,62 @@
     </table>
   </div>
   <div id="empty-state-obras" class="empty-state"></div>
+
+
+  <!-- TEMPLATE DE ENCARREGADOS ATUALIZADO -->
+  <template id="template-foremen">
+    <div class="page-header">
+      <div>
+        <h1>Cadastro de Encarregados</h1>
+        <p>Gerencie os encarregados e suas bases operacionais.</p>
+      </div>
+      <div class="header-actions">
+        <a href="/assets/templates/modelo_encarregados.xlsx" download class="btn-secondary">
+          <i class="ph ph-download-simple"></i> Baixar Modelo
+        </a>
+        <button id="btn-importar-encarregados" class="btn-secondary">
+          <i class="ph ph-upload-simple"></i> Importar
+        </button>
+        <button id="btn-novo-encarregado" class="btn-primary">
+          <i class="ph ph-plus"></i> Novo Encarregado
+        </button>
+        <input type="file" id="input-arquivo-encarregados" accept=".xlsx, .xls" style="display: none;">
+      </div>
+    </div>
+
+    <!-- BARRA DE FILTROS -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="filter-encarregado-base">Base Operacional</label>
+        <select id="filter-encarregado-base"></select>
+      </div>
+      <div class="filter-group search">
+        <label for="busca-encarregado">Busca por texto</label>
+        <div class="search-container">
+          <input type="text" id="busca-encarregado" placeholder="Nome, vulgo...">
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table" id="tabela-encarregados">
+        <thead>
+        <tr>
+          <th>Nome Completo</th>
+          <th>Vulgo</th>
+          <th>Base Operacional</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="empty-state-encarregados" class="empty-state"></div>
+
+    <!-- CONTROLES DE PAGINAÇÃO -->
+    <div class="pagination-controls" id="pagination-encarregados"></div>
+  </template>
 
   <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-obras"></div>
@@ -335,21 +390,17 @@
       <form id="profile-form">
         <div class="form-group">
           <label for="profile-name">Nome</label>
-          <input type="text" id="profile-name" value="Alexandre" required>
+          <input type="text" id="profile-name" value="SPL666599" required>
         </div>
         <div class="form-group">
           <label for="profile-email">Email</label>
-          <input type="email" id="profile-email" value="alexandre@sipel.com.br" required>
+          <input type="email" id="profile-email" value="controledesempenho@sipel.com.br" required>
         </div>
         <hr class="form-divider">
-        <hr class="form-divider">
-        <div class="form-group">
-          <label for="profile-current-password">Senha Atual</label>
-          <input type="password" id="profile-current-password" placeholder="Deixe em branco para não alterar">
-        </div>
+        <br>
         <div class="form-group">
           <label for="profile-new-password">Nova Senha</label>
-          <input type="password" id="profile-new-password">
+          <input type="password" id="profile-new-password" placeholder="Digite sua nova senha">
         </div>
       </form>
     </div>

@@ -56,7 +56,6 @@ public class MaterialController {
             ImportacaoResponseDTO resultado = materialService.importarMateriais(file);
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
-            System.out.println("Erro na importação de materiais: " + e.getMessage());
             e.printStackTrace();
 
             String mensagemErro = "Erro ao processar o arquivo: ";
@@ -67,7 +66,6 @@ public class MaterialController {
             } else {
                 mensagemErro += e.getMessage();
             }
-
             return ResponseEntity.badRequest().body(new ImportacaoResponseDTO(0, 0, List.of(mensagemErro)));
         }
     }

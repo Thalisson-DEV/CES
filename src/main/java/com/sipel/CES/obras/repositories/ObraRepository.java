@@ -20,9 +20,7 @@ public interface ObraRepository extends JpaRepository<Obra, Integer> {
 
     // Query para buscar obras com filtros e paginação
     @Query(
-            // Adicionamos nativeQuery = true
             nativeQuery = true,
-            // A query foi reescrita para usar sintaxe SQL nativa
             value = "SELECT o.* FROM obras o " +
                     "LEFT JOIN status_obras s ON s.id = o.status_id " +
                     "LEFT JOIN bases_operacionais b ON b.id = o.base_obra_id " +

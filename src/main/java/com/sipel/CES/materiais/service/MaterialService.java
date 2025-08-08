@@ -148,7 +148,6 @@ public class MaterialService {
                     novoMaterial.setCentro(centro);
 
                     materialParaSalvar.add(novoMaterial);
-                    System.out.println("DEBUG: Linha " + linhaAtual + " validada com sucesso.");
 
                 } catch (Exception e) {
                     System.out.println("DEBUG: ERRO na linha " + linhaAtual + ": " + e.getMessage());
@@ -157,15 +156,12 @@ public class MaterialService {
             }
             workbook.close();
         } catch (Exception e) {
-            System.out.println("DEBUG: Falha crítica ao ler o arquivo: " + e.getMessage());
             throw new RuntimeException("Falha ao ler o arquivo Excel: " + e.getMessage());
         }
 
         if (!materialParaSalvar.isEmpty()) {
             repository.saveAll(materialParaSalvar);
         }
-
-        System.out.println("DEBUG: Processamento finalizado. Sucessos: " + materialParaSalvar.size() + ", Falhas: " + erros.size());
         return new ImportacaoResponseDTO(materialParaSalvar.size(), erros.size(), erros);
     }
 
