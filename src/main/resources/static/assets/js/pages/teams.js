@@ -53,14 +53,14 @@ function setupEventListeners() {
  */
 async function loadSupportData() {
     try {
-        // Evita recarregar dados já buscados
         if (supportData.bases) return;
 
+        // CORREÇÃO: A chamada para coordenadores agora espera uma lista simples.
         const [basesRes, processosRes, supervisoresRes, coordenadoresRes] = await Promise.all([
             fetchAutenticado('/api/v1/bases-operacionais'),
-            fetchAutenticado('/api/v1/processos'), // Assumindo este endpoint
-            fetchAutenticado('/api/v1/supervisores'), // Assumindo este endpoint
-            fetchAutenticado('/api/v1/coordenadores') // Assumindo este endpoint
+            fetchAutenticado('/api/v1/processos'),
+            fetchAutenticado('/api/v1/supervisores'),
+            fetchAutenticado('/api/v1/coordenadores') // Endpoint agora retorna uma lista
         ]);
 
         if (!basesRes.ok || !processosRes.ok || !supervisoresRes.ok || !coordenadoresRes.ok) {
@@ -70,6 +70,8 @@ async function loadSupportData() {
         supportData.bases = await basesRes.json();
         supportData.processos = await processosRes.json();
         supportData.supervisores = await supervisoresRes.json();
+
+        // CORREÇÃO: Atribui diretamente a resposta da API, que agora é um array.
         supportData.coordenadores = await coordenadoresRes.json();
 
     } catch (error) {
@@ -85,7 +87,10 @@ function populateFilterDropdowns() {
         const select = document.getElementById(id);
         if (!select) return;
         select.innerHTML = `<option value="">Todos</option>`;
-        data?.forEach(item => select.add(new Option(item[nameProp], item[valueProp])));
+        data?.forEach(item => {
+            const text = typeof nameProp === 'function' ? nameProp(item) : item[nameProp];
+            select.add(new Option(text, item[valueProp]));
+        });
     };
 
     populate('filter-equipe-base', supportData.bases, 'nomeBase');
@@ -151,8 +156,8 @@ function renderTeamsTable(teams) {
                 <td>${team.vulgo || 'N/A'}</td>
                 <td>${team.baseOperacional?.nomeBase || 'N/A'}</td>
                 <td>${team.processo?.nomeProcesso || 'N/A'}</td>
-                <td>${team.coordenador?.nomeUsuario || 'N/A'}</td>
-                <td>${team.supervisor?.nomeUsuario || 'N/A'}</td>
+                <td>${team.coordenador?.usuario?.nomeCompleto || 'N/A'}</td>
+                <td>${team.supervisor?.usuario?.nomeCompleto || 'N/A'}</td>
                 <td>${statusTag}</td>
                 <td class="actions">
                     <button class="btn-icon btn-edit" data-id="${team.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -203,7 +208,6 @@ function showTeamForm(team = null) {
     const isEdit = team !== null;
     const title = isEdit ? 'Editar Equipe' : 'Nova Equipe';
 
-    // CORREÇÃO: Alterado 'emailCoordenacao' para 'emailCoordenador' para corresponder à entidade Java.
     const formBody = `
         <form id="form-team">
             <input type="hidden" id="team-id" value="${isEdit ? team.id : ''}">
@@ -251,14 +255,19 @@ function showTeamForm(team = null) {
     const populate = (id, data, nameProp, valueProp = 'id', selected) => {
         const select = document.getElementById(id);
         select.innerHTML = '<option value="">Selecione...</option>';
-        data?.forEach(item => select.add(new Option(item[nameProp], item[valueProp])));
+        data?.forEach(item => {
+            // Permite que nameProp seja uma função para acessar dados aninhados
+            const text = typeof nameProp === 'function' ? nameProp(item) : item[nameProp];
+            select.add(new Option(text, item[valueProp]));
+        });
         if (selected) select.value = selected;
     };
 
     populate('baseOperacional', supportData.bases, 'nomeBase', 'id', isEdit ? team.baseOperacional?.id : null);
     populate('processo', supportData.processos, 'nomeProcesso', 'id', isEdit ? team.processo?.id : null);
-    populate('coordenador', supportData.coordenadores, 'nomeUsuario', 'id', isEdit ? team.coordenador?.id : null);
-    populate('supervisor', supportData.supervisores, 'nomeUsuario', 'id', isEdit ? team.supervisor?.id : null);
+    // CORREÇÃO: Passa uma função para acessar o nome do usuário aninhado
+    populate('coordenador', supportData.coordenadores, (item) => item.usuarioId?.user || 'Usuário Inválido', 'id', isEdit ? team.coordenador?.id : null);
+    populate('supervisor', supportData.supervisores, (item) => item.usuario?.nomeCompleto || 'Usuário Inválido', 'id', isEdit ? team.supervisor?.id : null);
 }
 
 /**
@@ -269,7 +278,6 @@ async function handleFormSubmit() {
     const id = form.querySelector('#team-id').value;
     const isEdit = !!id;
 
-    // CORREÇÃO: Alterado 'emailCoordenacao' para 'emailCoordenador' no objeto de dados.
     const teamData = {
         nomeEquipe: form.querySelector('#nomeEquipe').value,
         vulgo: form.querySelector('#vulgo').value,

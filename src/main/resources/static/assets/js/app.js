@@ -3,7 +3,7 @@ import { renderDashboardPage } from './pages/dashboard.js';
 import { renderMaterialsPage } from './pages/materiais.js';
 import { renderWorksPage } from './pages/works.js';
 import { renderTeamsPage } from './pages/teams.js';
-import { renderCoordinatorsPage } from './pages/coordinators.js';
+import { renderUsersPage } from './pages/users.js';
 import { showUserProfileModal, closeAllModals } from './components.js';
 
 // Mapeamento de rotas para as funções que renderizam cada página
@@ -14,7 +14,7 @@ const routes = {
     '/materials': renderMaterialsPage,
     '/works': renderWorksPage,
     '/teams': renderTeamsPage,
-    '/coordinators': renderCoordinatorsPage,
+    '/users': renderUsersPage,
 };
 
 /**

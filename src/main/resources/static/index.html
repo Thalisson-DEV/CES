@@ -80,9 +80,9 @@
         <h3>Cadastros</h3>
         <ul>
           <li><a href="#/materials" class="page-link">Materiais</a></li>
-          <li><a href="#/coordinators" class="page-link">Coordenadores</a></li>
           <li><a href="#/works" class="page-link">Obras</a></li>
           <li><a href="#/teams" class="page-link">Equipes</a></li>
+          <li><a href="#/users" class="page-link">Usuários</a></li>
         </ul>
       </div>
       <div id="submenu-solicitacoes" class="submenu-content">
@@ -299,7 +299,7 @@
   <div class="pagination-controls" id="pagination-obras"></div>
 </template>
 
-<!-- TEMPLATE DE ENCARREGADOS ATUALIZADO -->
+<!-- TEMPLATE DE EQUIPES ATUALIZADO -->
 <template id="template-teams">
   <div class="page-header">
     <div>
@@ -361,48 +361,58 @@
   <div class="pagination-controls" id="pagination-equipes"></div>
 </template>
 
-<!-- TEMPLATE DE COORDENADORES -->
-<template id="template-coordinators">
+<!-- TEMPLATE PARA CADASTRO DE USUARIOS -->
+<template id="template-users">
   <div class="page-header">
     <div>
-      <h1>Cadastro de Coordenadores</h1>
-      <p>Gerencie os usuários que possuem o papel de coordenador.</p>
+      <h1>Gerenciamento de Usuários</h1>
+      <p>Adicione e gerencie os usuários do sistema.</p>
     </div>
     <div class="header-actions">
-      <button id="btn-novo-coordenador" class="btn-primary">
-        <i class="ph ph-plus"></i> Novo Coordenador
+      <button id="btn-novo-usuario" class="btn-primary">
+        <i class="ph ph-plus"></i> Novo Usuário
       </button>
     </div>
   </div>
 
   <!-- BARRA DE FILTROS -->
   <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-user-perfil">Perfil</label>
+      <select id="filter-user-perfil"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-user-base">Base Operacional</label>
+      <select id="filter-user-base"></select>
+    </div>
     <div class="filter-group search">
-      <label for="busca-coordenador">Buscar por nome</label>
+      <label for="busca-usuario">Busca por texto</label>
       <div class="search-container">
         <i class="ph ph-magnifying-glass"></i>
-        <input type="text" id="busca-coordenador" placeholder="Nome do usuário...">
+        <input type="text" id="busca-usuario" placeholder="Nome, login, email...">
       </div>
     </div>
   </div>
 
   <div class="table-container">
-    <table class="data-table" id="tabela-coordenadores">
+    <table class="data-table" id="tabela-usuarios">
       <thead>
       <tr>
-        <th>Nome do Usuário</th>
+        <th>Nome Completo</th>
+        <th>Login (Usuário)</th>
+        <th>Email</th>
+        <th>Perfil</th>
+        <th>Base</th>
         <th>Status</th>
-        <th>Data de Criação</th>
-        <th>Ações</th>
       </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
-  <div id="empty-state-coordenadores" class="empty-state"></div>
+  <div id="empty-state-usuarios" class="empty-state"></div>
 
   <!-- CONTROLES DE PAGINAÇÃO -->
-  <div class="pagination-controls" id="pagination-coordenadores"></div>
+  <div class="pagination-controls" id="pagination-usuarios"></div>
 </template>
 
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->

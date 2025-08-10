@@ -23,6 +23,5 @@ public class AuthenticationService implements UserDetailsService {
         } catch (NullPointerException e) {
             throw e;
         }
-
     }
 }
