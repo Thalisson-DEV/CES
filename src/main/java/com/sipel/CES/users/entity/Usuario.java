@@ -1,6 +1,6 @@
 package com.sipel.CES.users.entity;
 
-import com.sipel.CES.basesOperacionais.entity.BaseOperacional;
+import com.sipel.CES.choreCadastros.basesOperacionais.entity.BaseOperacional;
 import com.sipel.CES.generic.entitys.Perfil;
 import jakarta.persistence.*;
 import lombok.*;

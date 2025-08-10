@@ -80,8 +80,9 @@
         <h3>Cadastros</h3>
         <ul>
           <li><a href="#/materials" class="page-link">Materiais</a></li>
+          <li><a href="#/coordinators" class="page-link">Coordenadores</a></li>
           <li><a href="#/works" class="page-link">Obras</a></li>
-          <li><a href="#/foremen" class="page-link">Encarregados</a></li>
+          <li><a href="#/teams" class="page-link">Equipes</a></li>
         </ul>
       </div>
       <div id="submenu-solicitacoes" class="submenu-content">
@@ -294,64 +295,114 @@
   </div>
   <div id="empty-state-obras" class="empty-state"></div>
 
-
-  <!-- TEMPLATE DE ENCARREGADOS ATUALIZADO -->
-  <template id="template-foremen">
-    <div class="page-header">
-      <div>
-        <h1>Cadastro de Encarregados</h1>
-        <p>Gerencie os encarregados e suas bases operacionais.</p>
-      </div>
-      <div class="header-actions">
-        <a href="/assets/templates/modelo_encarregados.xlsx" download class="btn-secondary">
-          <i class="ph ph-download-simple"></i> Baixar Modelo
-        </a>
-        <button id="btn-importar-encarregados" class="btn-secondary">
-          <i class="ph ph-upload-simple"></i> Importar
-        </button>
-        <button id="btn-novo-encarregado" class="btn-primary">
-          <i class="ph ph-plus"></i> Novo Encarregado
-        </button>
-        <input type="file" id="input-arquivo-encarregados" accept=".xlsx, .xls" style="display: none;">
-      </div>
-    </div>
-
-    <!-- BARRA DE FILTROS -->
-    <div class="filter-bar">
-      <div class="filter-group">
-        <label for="filter-encarregado-base">Base Operacional</label>
-        <select id="filter-encarregado-base"></select>
-      </div>
-      <div class="filter-group search">
-        <label for="busca-encarregado">Busca por texto</label>
-        <div class="search-container">
-          <input type="text" id="busca-encarregado" placeholder="Nome, vulgo...">
-        </div>
-      </div>
-    </div>
-
-    <div class="table-container">
-      <table class="data-table" id="tabela-encarregados">
-        <thead>
-        <tr>
-          <th>Nome Completo</th>
-          <th>Vulgo</th>
-          <th>Base Operacional</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id="empty-state-encarregados" class="empty-state"></div>
-
-    <!-- CONTROLES DE PAGINAÇÃO -->
-    <div class="pagination-controls" id="pagination-encarregados"></div>
-  </template>
-
   <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-obras"></div>
+</template>
+
+<!-- TEMPLATE DE ENCARREGADOS ATUALIZADO -->
+<template id="template-teams">
+  <div class="page-header">
+    <div>
+      <h1>Cadastro de Equipes</h1>
+      <p>Gerencie as equipes operacionais e suas lideranças.</p>
+    </div>
+    <div class="header-actions">
+      <a href="/assets/templates/modelo_equipes.xlsx" download class="btn-secondary">
+        <i class="ph ph-download-simple"></i> Baixar Modelo
+      </a>
+      <button id="btn-importar-equipes" class="btn-secondary">
+        <i class="ph ph-upload-simple"></i> Importar
+      </button>
+      <button id="btn-nova-equipe" class="btn-primary">
+        <i class="ph ph-plus"></i> Nova Equipe
+      </button>
+      <input type="file" id="input-arquivo-equipes" accept=".xlsx, .xls" style="display: none;">
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-equipe-base">Base Operacional</label>
+      <select id="filter-equipe-base"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-equipe-processo">Processo</label>
+      <select id="filter-equipe-processo"></select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-equipe">Busca por texto</label>
+      <div class="search-container">
+        <input type="text" id="busca-equipe" placeholder="Nome da equipe, vulgo...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-equipes">
+      <thead>
+      <tr>
+        <th>Nome da Equipe</th>
+        <th>Vulgo</th>
+        <th>Base</th>
+        <th>Processo</th>
+        <th>Coordenador</th>
+        <th>Supervisor</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-equipes" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-equipes"></div>
+</template>
+
+<!-- TEMPLATE DE COORDENADORES -->
+<template id="template-coordinators">
+  <div class="page-header">
+    <div>
+      <h1>Cadastro de Coordenadores</h1>
+      <p>Gerencie os usuários que possuem o papel de coordenador.</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-novo-coordenador" class="btn-primary">
+        <i class="ph ph-plus"></i> Novo Coordenador
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group search">
+      <label for="busca-coordenador">Buscar por nome</label>
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-coordenador" placeholder="Nome do usuário...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-coordenadores">
+      <thead>
+      <tr>
+        <th>Nome do Usuário</th>
+        <th>Status</th>
+        <th>Data de Criação</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-coordenadores" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-coordenadores"></div>
 </template>
 
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->
