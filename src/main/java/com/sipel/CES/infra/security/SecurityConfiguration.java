@@ -51,12 +51,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/obras").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/obras").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
 
-                        // Encarregados-API
-                        .requestMatchers(HttpMethod.GET, "/api/v1/encarregados").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/encarregados").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/encarregados/import").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/encarregados").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/encarregados").hasAnyRole("ADMINISTRADOR", "COORDENADOR")
 
                         // AnyResquest, precisa apenas estar authenticado
                         .anyRequest().authenticated()

@@ -1,5 +1,6 @@
 package com.sipel.CES.choreCadastros.equipes.DTOs;
 
+import com.sipel.CES.choreCadastros.equipes.entity.Equipe;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -27,5 +28,4 @@ public record EquipeDTO(
         @NotBlank
         OffsetDateTime dataCriacao
 ) {
-
 }

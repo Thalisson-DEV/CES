@@ -49,9 +49,11 @@ public class ObraController {
     public ResponseEntity<Page<ObraResponseDTO>> getAllObras(
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer baseId,
+            @RequestParam(required = false) Integer coordenadorId,
+            @RequestParam(required = false) Integer supervisorId,
             @RequestParam(required = false) String searchTerm,
             Pageable pageable) {
-        Page<ObraResponseDTO> obras = obraService.getAllObras(statusId, baseId, searchTerm, pageable);
+        Page<ObraResponseDTO> obras = obraService.getAllObras(statusId, baseId, coordenadorId, supervisorId, searchTerm, pageable);
         return ResponseEntity.ok(obras);
     }
 
@@ -100,4 +102,13 @@ public class ObraController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ObraResponseDTO> getObraById(@PathVariable(value = "id") Integer id) {
+        try {
+            ObraResponseDTO obra = obraService.getObraById(id);
+            return ResponseEntity.ok().body(obra);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 }

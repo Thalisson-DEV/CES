@@ -1,7 +1,7 @@
 package com.sipel.CES.choreCadastros.supervisor.controller;
 
-import com.sipel.CES.choreCadastros.supervisor.entity.Supervisor;
-import com.sipel.CES.choreCadastros.supervisor.repository.SupervisorRepository;
+import com.sipel.CES.choreCadastros.supervisor.DTOs.SupervisorResponseDTO;
+import com.sipel.CES.choreCadastros.supervisor.service.SupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +15,11 @@ import java.util.List;
 public class SupervisorController {
 
     @Autowired
-    private SupervisorRepository repository;
+    private SupervisorService service;
 
     @GetMapping
-    public ResponseEntity<List<Supervisor>> getAllSupervisores() {
-        return ResponseEntity.ok(repository.findAll());
+    public ResponseEntity<List<SupervisorResponseDTO>> getAllSupervisoresList() {
+        List<SupervisorResponseDTO> supervisores = service.getAllSupervisoresList();
+        return ResponseEntity.ok(supervisores);
     }
 }

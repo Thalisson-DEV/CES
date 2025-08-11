@@ -156,8 +156,8 @@ function renderTeamsTable(teams) {
                 <td>${team.vulgo || 'N/A'}</td>
                 <td>${team.baseOperacional?.nomeBase || 'N/A'}</td>
                 <td>${team.processo?.nomeProcesso || 'N/A'}</td>
-                <td>${team.coordenador?.usuario?.nomeCompleto || 'N/A'}</td>
-                <td>${team.supervisor?.usuario?.nomeCompleto || 'N/A'}</td>
+                <td>${team.coordenador?.username?.user || 'N/A'}</td>
+                <td>${team.supervisor?.username?.user || 'N/A'}</td>
                 <td>${statusTag}</td>
                 <td class="actions">
                     <button class="btn-icon btn-edit" data-id="${team.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -267,7 +267,7 @@ function showTeamForm(team = null) {
     populate('processo', supportData.processos, 'nomeProcesso', 'id', isEdit ? team.processo?.id : null);
     // CORREÇÃO: Passa uma função para acessar o nome do usuário aninhado
     populate('coordenador', supportData.coordenadores, (item) => item.usuarioId?.user || 'Usuário Inválido', 'id', isEdit ? team.coordenador?.id : null);
-    populate('supervisor', supportData.supervisores, (item) => item.usuario?.nomeCompleto || 'Usuário Inválido', 'id', isEdit ? team.supervisor?.id : null);
+    populate('supervisor', supportData.supervisores, (item) => item.usuarioId?.user || 'Usuário Inválido', 'id', isEdit ? team.supervisor?.id : null);
 }
 
 /**

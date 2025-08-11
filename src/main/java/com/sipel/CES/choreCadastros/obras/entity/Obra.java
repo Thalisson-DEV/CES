@@ -1,12 +1,15 @@
 package com.sipel.CES.choreCadastros.obras.entity;
 
 import com.sipel.CES.choreCadastros.basesOperacionais.entity.BaseOperacional;
+import com.sipel.CES.choreCadastros.coordenador.entity.Coordenador;
+import com.sipel.CES.choreCadastros.supervisor.entity.Supervisor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -34,6 +37,14 @@ public class Obra {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id")
     private StatusObra statusObra;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "coordenador_id")
+    private Coordenador coordenador;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "supervisor_id")
+    private Supervisor supervisor;
     private boolean ativo;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private OffsetDateTime dataCriacao;
 }

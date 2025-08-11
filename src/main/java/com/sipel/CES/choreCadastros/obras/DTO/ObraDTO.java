@@ -4,6 +4,7 @@ package com.sipel.CES.choreCadastros.obras.DTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -18,10 +19,13 @@ public record ObraDTO(
         // Datas podem ser nulas
         LocalDate dataInicio,
         LocalDate dataFim,
+        Integer coordenador,
+        Integer supervisor,
+        BigDecimal latitude,
+        BigDecimal longitude,
         @NotNull
         Integer statusObra,
         boolean ativo,
-        // DataCriacao é gerenciada pelo sistema
         OffsetDateTime dataCriacao
 ) {
 }

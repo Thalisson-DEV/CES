@@ -131,6 +131,19 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+
+				<!-- ADICIONE ESTE BLOCO DE CONFIGURAÇÃO -->
+				<configuration>
+					<url>jdbc:postgresql://localhost:5432/CES-API</url>
+					<user>postgres</user>
+					<password>paodepovilho2003</password>
+					<cleanDisabled>false</cleanDisabled>
+				</configuration>
+
+			</plugin>
 		</plugins>
 	</build>
 

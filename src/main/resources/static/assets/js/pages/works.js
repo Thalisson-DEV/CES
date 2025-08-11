@@ -3,13 +3,14 @@ import { fetchAutenticado } from '../api.js';
 import { showNotification, showImportModal, showDrawer, closeDrawer } from '../components.js';
 
 // Estado da página
-let allWorks = [];
 let supportData = {};
 let currentPage = 0;
 let itemsPerPage = 10;
 let currentFilters = {
     statusId: '',
     baseId: '',
+    coordenadorId: '',
+    supervisorId: '',
     searchTerm: ''
 };
 
@@ -39,38 +40,54 @@ function setupWorksEventListeners() {
     // Filtros
     document.getElementById('filter-obra-status').addEventListener('change', (e) => updateFilter('statusId', e.target.value));
     document.getElementById('filter-obra-base').addEventListener('change', (e) => updateFilter('baseId', e.target.value));
+    document.getElementById('filter-obra-coordenador').addEventListener('change', (e) => updateFilter('coordenadorId', e.target.value));
+    document.getElementById('filter-obra-supervisor').addEventListener('change', (e) => updateFilter('supervisorId', e.target.value));
     document.getElementById('busca-obra').addEventListener('input', (e) => updateFilter('searchTerm', e.target.value));
 }
 
 async function loadSupportData() {
     try {
-        if (supportData.status && supportData.bases) return;
-        const [statusRes, basesRes] = await Promise.all([
+        if (supportData.status) return; // Carrega apenas uma vez
+        const [statusRes, basesRes, coordenadoresRes, supervisoresRes] = await Promise.all([
             fetchAutenticado('/api/v1/status-obra'),
-            fetchAutenticado('/api/v1/bases-operacionais')
+            fetchAutenticado('/api/v1/bases-operacionais'),
+            fetchAutenticado('/api/v1/coordenadores'),
+            fetchAutenticado('/api/v1/supervisores')
         ]);
-        if (!statusRes.ok || !basesRes.ok) throw new Error('Falha ao carregar dados de suporte.');
+
+        if (!statusRes.ok || !basesRes.ok || !coordenadoresRes.ok || !supervisoresRes.ok) {
+            throw new Error('Falha ao carregar dados de suporte para obras.');
+        }
 
         supportData.status = await statusRes.json();
         supportData.bases = await basesRes.json();
+        supportData.coordenadores = (await coordenadoresRes.json()).content; // Extrai da paginação
+        supportData.supervisores = await supervisoresRes.json();
+
     } catch (error) {
         showNotification(error.message, 'error');
     }
 }
 
 function populateFilterDropdowns() {
-    const statusSelect = document.getElementById('filter-obra-status');
-    const baseSelect = document.getElementById('filter-obra-base');
+    const populate = (id, data, nameProp, valueProp = 'id') => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.innerHTML = `<option value="">Todos</option>`;
+        data?.forEach(item => {
+            const text = typeof nameProp === 'function' ? nameProp(item) : item[nameProp];
+            select.add(new Option(text, item[valueProp]));
+        });
+    };
 
-    statusSelect.innerHTML = '<option value="">Todos os Status</option>';
-    supportData.status?.forEach(s => statusSelect.add(new Option(s.nomeStatus, s.id)));
-
-    baseSelect.innerHTML = '<option value="">Todas as Bases</option>';
-    supportData.bases?.forEach(b => baseSelect.add(new Option(b.nomeBase, b.id)));
+    populate('filter-obra-status', supportData.status, 'nomeStatus');
+    populate('filter-obra-base', supportData.bases, 'nomeBase');
+    populate('filter-obra-coordenador', supportData.coordenadores, item => item.usuarioId?.user || 'N/A', 'id');
+    populate('filter-obra-supervisor', supportData.supervisores, item => item.usuario?.nomeCompleto || 'N/A', 'id');
 }
 
 function updateFilter(key, value) {
-    currentPage = 0; // Reseta para a primeira página ao aplicar um filtro
+    currentPage = 0;
     currentFilters[key] = value;
     loadWorks();
 }
@@ -79,14 +96,11 @@ async function loadWorks() {
     const params = new URLSearchParams({
         page: currentPage,
         size: itemsPerPage,
-        sort: 'id,desc' // Exemplo de ordenação
+        sort: 'id,desc'
     });
 
-    // Adiciona filtros à URL apenas se tiverem valor
     Object.entries(currentFilters).forEach(([key, value]) => {
-        if (value) {
-            params.append(key, value);
-        }
+        if (value) params.append(key, value);
     });
 
     try {
@@ -94,7 +108,6 @@ async function loadWorks() {
         if (!response.ok) throw new Error('Falha ao carregar obras.');
 
         const pageData = await response.json();
-        allWorks = pageData.content;
         renderWorksTable(pageData.content);
         renderPaginationControls(pageData);
     } catch (error) {
@@ -114,13 +127,24 @@ function renderWorksTable(works) {
         emptyState.style.display = 'none';
         works.forEach(work => {
             const tr = document.createElement('tr');
+
+            // CORREÇÃO: Lógica para criar o link do mapa DIRETAMENTE no frontend
+            const hasLocation = work.latitude && work.longitude;
+            const mapsUrl = `https://www.google.com/maps?q=${work.latitude},${work.longitude}`;
+            const mapButton = hasLocation
+                ? `<a href="${mapsUrl}" target="_blank" class="btn-icon" title="Ver no mapa"><i class="ph ph-map-pin"></i></a>`
+                : `<button class="btn-icon" disabled title="Localização indisponível"><i class="ph ph-map-pin-line"></i></button>`;
+
             tr.innerHTML = `
                 <td>${work.numeroObra || 'N/A'}</td>
                 <td>${work.titulo || 'N/A'}</td>
                 <td><span class="tag">${work.status?.nomeStatus || 'N/A'}</span></td>
                 <td>${work.baseObra?.nomeBase || 'N/A'}</td>
                 <td>${work.dataInicio ? new Date(work.dataInicio).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                <td>${work.coordenador?.username?.user || 'N/A'}</td>
+                <td>${work.supervisor?.username?.user || 'N/A'}</td>
                 <td class="actions">
+                    ${mapButton}
                     <button class="btn-icon btn-edit" data-id="${work.id}"><i class="ph ph-pencil-simple"></i></button>
                     <button class="btn-icon btn-delete" data-id="${work.id}"><i class="ph ph-trash"></i></button>
                 </td>
@@ -133,65 +157,32 @@ function renderWorksTable(works) {
 function renderPaginationControls(pageData) {
     const container = document.getElementById('pagination-obras');
     if (!container) return;
-
-    const { totalElements, totalPages, number: currentPageIndex, size, first, last } = pageData;
-
+    const { totalElements, totalPages, number: pageIndex, size, first, last } = pageData;
     if (totalElements === 0) {
         container.innerHTML = '';
         return;
     }
-
-    const startItem = currentPageIndex * size + 1;
+    const startItem = pageIndex * size + 1;
     const endItem = startItem + pageData.numberOfElements - 1;
-
     container.innerHTML = `
-        <div class="pagination-summary">
-            Mostrando <strong>${startItem}</strong>-<strong>${endItem}</strong> de <strong>${totalElements}</strong>
-        </div>
+        <div class="pagination-summary">Mostrando <strong>${startItem}</strong>-<strong>${endItem}</strong> de <strong>${totalElements}</strong></div>
         <div class="pagination-size">
-            <label for="items-per-page">Itens por página:</label>
-            <select id="items-per-page">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="1000">1000</option>
-            </select>
+            <label for="items-per-page-works">Itens:</label>
+            <select id="items-per-page-works"><option value="10">10</option><option value="25">25</option><option value="50">50</option></select>
         </div>
         <div class="pagination-nav">
-            <button class="btn-icon" id="prev-page" ${first ? 'disabled' : ''}><i class="ph ph-caret-left"></i></button>
-            <span class="page-info">Página ${currentPageIndex + 1} de ${totalPages}</span>
-            <button class="btn-icon" id="next-page" ${last ? 'disabled' : ''}><i class="ph ph-caret-right"></i></button>
+            <button class="btn-icon" id="prev-page-works" ${first ? 'disabled' : ''}><i class="ph ph-caret-left"></i></button>
+            <span class="page-info">Página ${pageIndex + 1} de ${totalPages}</span>
+            <button class="btn-icon" id="next-page-works" ${last ? 'disabled' : ''}><i class="ph ph-caret-right"></i></button>
         </div>
     `;
-
-    const itemsPerPageSelect = document.getElementById('items-per-page');
-    itemsPerPageSelect.value = itemsPerPage;
-
-    itemsPerPageSelect.addEventListener('change', (e) => {
-        itemsPerPage = parseInt(e.target.value);
-        currentPage = 0;
-        loadWorks();
-    });
-
-    document.getElementById('prev-page').addEventListener('click', () => {
-        if (!first) {
-            currentPage--;
-            loadWorks();
-        }
-    });
-
-    document.getElementById('next-page').addEventListener('click', () => {
-        if (!last) {
-            currentPage++;
-            loadWorks();
-        }
-    });
+    const select = document.getElementById('items-per-page-works');
+    select.value = itemsPerPage;
+    select.addEventListener('change', (e) => { itemsPerPage = parseInt(e.target.value); currentPage = 0; loadWorks(); });
+    document.getElementById('prev-page-works').addEventListener('click', () => { if (!first) { currentPage--; loadWorks(); } });
+    document.getElementById('next-page-works').addEventListener('click', () => { if (!last) { currentPage++; loadWorks(); } });
 }
 
-/**
- * Mostra o formulário de obra no painel lateral.
- */
 function showWorkForm(work = null) {
     const isEdit = work !== null;
     const title = isEdit ? 'Editar Obra' : 'Nova Obra';
@@ -217,9 +208,25 @@ function showWorkForm(work = null) {
                     <select id="base-obra" required></select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="base-saque">Base de Saque*</label>
-                <select id="base-saque" required></select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="coordenador">Coordenador</label>
+                    <select id="coordenador"></select>
+                </div>
+                <div class="form-group">
+                    <label for="supervisor">Supervisor</label>
+                    <select id="supervisor"></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" value="${isEdit ? work.latitude || '' : ''}">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" value="${isEdit ? work.longitude || '' : ''}">
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -236,28 +243,22 @@ function showWorkForm(work = null) {
 
     showDrawer({ title, body: formBody, onSave: handleWorkFormSubmit });
 
-    const statusSelect = document.getElementById('status-obra');
-    const baseObraSelect = document.getElementById('base-obra');
-    const baseSaqueSelect = document.getElementById('base-saque');
+    const populate = (id, data, nameProp, valueProp = 'id', selected) => {
+        const select = document.getElementById(id);
+        select.innerHTML = '<option value="">Selecione...</option>';
+        data?.forEach(item => {
+            const text = typeof nameProp === 'function' ? nameProp(item) : item[nameProp];
+            select.add(new Option(text, item[valueProp]));
+        });
+        if (selected) select.value = selected;
+    };
 
-    [statusSelect, baseObraSelect, baseSaqueSelect].forEach(s => s.innerHTML = '<option value="">Selecione...</option>');
-
-    supportData.status?.forEach(s => statusSelect.add(new Option(s.nomeStatus, s.id)));
-    supportData.bases?.forEach(b => {
-        baseObraSelect.add(new Option(b.nomeBase, b.id));
-        baseSaqueSelect.add(new Option(b.nomeBase, b.id));
-    });
-
-    if (isEdit) {
-        statusSelect.value = work.status?.id;
-        baseObraSelect.value = work.baseObra?.id;
-        baseSaqueSelect.value = work.baseSaque?.id;
-    }
+    populate('status-obra', supportData.status, 'nomeStatus', 'id', isEdit ? work.status?.id : null);
+    populate('base-obra', supportData.bases, 'nomeBase', 'id', isEdit ? work.baseObra?.id : null);
+    populate('coordenador', supportData.coordenadores, item => item.usuarioId?.user || 'N/A', 'id', isEdit ? work.coordenador?.id : null);
+    populate('supervisor', supportData.supervisores, item => item.usuarioId?.user || 'N/A', 'id', isEdit ? work.supervisor?.id : null);
 }
 
-/**
- * Lida com o envio do formulário de obra.
- */
 async function handleWorkFormSubmit() {
     const form = document.getElementById('form-obra');
     const id = form.querySelector('#obra-id').value;
@@ -266,15 +267,17 @@ async function handleWorkFormSubmit() {
     const workData = {
         numeroObra: form.querySelector('#numero-obra').value,
         titulo: form.querySelector('#titulo-obra').value,
-        statusObra: parseInt(form.querySelector('#status-obra').value),
-        baseObra: parseInt(form.querySelector('#base-obra').value),
-        baseSaque: parseInt(form.querySelector('#base-saque').value),
+        statusId: parseInt(form.querySelector('#status-obra').value) || null,
+        baseObraId: parseInt(form.querySelector('#base-obra').value) || null,
+        coordenadorId: parseInt(form.querySelector('#coordenador').value) || null,
+        supervisorId: parseInt(form.querySelector('#supervisor').value) || null,
+        latitude: form.querySelector('#latitude').value || null,
+        longitude: form.querySelector('#longitude').value || null,
         dataInicio: form.querySelector('#data-inicio').value || null,
         dataFim: form.querySelector('#data-fim').value || null,
-        ativo: true,
     };
 
-    if (!workData.numeroObra || !workData.titulo || !workData.statusObra) {
+    if (!workData.numeroObra || !workData.titulo || !workData.statusId) {
         showNotification('Nº da Obra, Título e Status são obrigatórios.', 'error');
         throw new Error('Validation failed');
     }
@@ -283,15 +286,11 @@ async function handleWorkFormSubmit() {
     const method = isEdit ? 'PUT' : 'POST';
 
     try {
-        const response = await fetchAutenticado(endpoint, {
-            method,
-            body: JSON.stringify(workData)
-        });
+        const response = await fetchAutenticado(endpoint, { method, body: JSON.stringify(workData) });
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || `Falha ao ${isEdit ? 'atualizar' : 'criar'} obra.`);
+            throw new Error(error.message || `Falha ao salvar obra.`);
         }
-
         showNotification(`Obra ${isEdit ? 'atualizada' : 'criada'} com sucesso!`, 'success');
         closeDrawer();
         loadWorks();
@@ -301,23 +300,16 @@ async function handleWorkFormSubmit() {
     }
 }
 
-/**
- * Lida com a importação de arquivo.
- */
 async function handleFileImport(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('file', file);
-
-    showNotification('Importando arquivo, por favor aguarde...', 'info');
-
+    showNotification('Importando arquivo...', 'info');
     try {
         const response = await fetchAutenticado('/api/v1/obras/import', { method: 'POST', body: formData });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Erro na importação.');
-
         showImportModal(result, 'Obras');
         loadWorks();
     } catch (error) {
@@ -327,38 +319,28 @@ async function handleFileImport(e) {
     }
 }
 
-/**
- * Lida com a busca na tabela.
- */
-function handleSearch(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredWorks = allWorks.filter(work =>
-        work.titulo?.toLowerCase().includes(searchTerm) ||
-        work.numeroObra?.toLowerCase().includes(searchTerm)
-    );
-    renderWorksTable(filteredWorks);
-}
-
-/**
- * Lida com ações da tabela.
- */
 async function handleTableActions(e) {
     const button = e.target.closest('button.btn-icon');
+    // Adiciona uma verificação para ignorar cliques em links de mapa
+    if (!button && e.target.closest('a')) return;
     if (!button) return;
 
     const id = button.dataset.id;
 
     if (button.classList.contains('btn-edit')) {
-        const workToEdit = allWorks.find(w => w.id == id);
-        if (workToEdit) {
+        try {
+            const response = await fetchAutenticado(`/api/v1/obras/${id}`);
+            if (!response.ok) throw new Error('Falha ao buscar dados da obra.');
+            const workToEdit = await response.json();
             showWorkForm(workToEdit);
+        } catch (error) {
+            showNotification(error.message, 'error');
         }
     }
 
     if (button.classList.contains('btn-delete')) {
         if (confirm('Tem certeza que deseja excluir esta obra?')) {
             try {
-                // CORREÇÃO: O endpoint para deletar agora inclui o ID na URL.
                 const response = await fetchAutenticado(`/api/v1/obras/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Falha ao excluir obra.');
                 showNotification('Obra excluída com sucesso!', 'success');

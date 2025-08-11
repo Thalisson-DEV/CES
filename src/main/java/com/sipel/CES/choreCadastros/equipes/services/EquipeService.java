@@ -240,9 +240,7 @@ public class EquipeService {
         entity.setCoordenador(coordenadorEquipe);
         entity.setSupervisor(supervisorEquipe);
         entity.setAtivo(true);
-        if (entity.getDataCriacao() == null) {
-            entity.setDataCriacao(dto.dataCriacao());
-        }
+        entity.setDataCriacao(OffsetDateTime.now());
     }
 
 }

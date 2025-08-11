@@ -1,5 +1,9 @@
 package com.sipel.CES.choreCadastros.obras.service;
 
+import com.sipel.CES.choreCadastros.coordenador.entity.Coordenador;
+import com.sipel.CES.choreCadastros.coordenador.repository.CoordenadorRepository;
+import com.sipel.CES.choreCadastros.supervisor.entity.Supervisor;
+import com.sipel.CES.choreCadastros.supervisor.repository.SupervisorRepository;
 import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
 import com.sipel.CES.choreCadastros.obras.DTO.ObraResponseDTO;
 import com.sipel.CES.exceptions.ObraException;
@@ -19,11 +23,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.Pageable; // <-- ADICIONE ESTA LINHA
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,20 +53,14 @@ public class ObraService {
     @Autowired
     StatusObraRepository StatusObraRepository;
 
-    public List<ObraResponseDTO> getAllObras() {
-        return repository.findAllWithDetails().stream()
-                .map(ObraResponseDTO::new)
-                .collect(Collectors.toList());
-    }
+    @Autowired
+    CoordenadorRepository coordenadorRepository;
+
+    @Autowired
+    SupervisorRepository supervisorRepository;
 
     public ObraResponseDTO getObraById(Integer id){
         Obra obra = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Obra não encontrada"));
-        return new ObraResponseDTO(obra);
-    }
-
-    public ObraResponseDTO getObraByNumero(String numeroObra){
-        Obra obra = repository.findByNumeroObra(numeroObra)
                 .orElseThrow(() -> new EntityNotFoundException("Obra não encontrada"));
         return new ObraResponseDTO(obra);
     }
@@ -125,6 +128,13 @@ public class ObraService {
                     String baseSaqueNome = getStringCellValue(currentRow.getCell(4));
                     LocalDate dataInicio = getDateCellValue(currentRow.getCell(5));
                     LocalDate dataFim = getDateCellValue(currentRow.getCell(6));
+                    String coordenadorNome = getStringCellValue(currentRow.getCell(7));
+                    String supervisorNome = getStringCellValue(currentRow.getCell(8));
+                    String latitudeString = getStringCellValue(currentRow.getCell(9));
+                    String longitudeString = getStringCellValue(currentRow.getCell(10));
+
+                    BigDecimal latitude = new BigDecimal(latitudeString);
+                    BigDecimal longitude = new BigDecimal(longitudeString);
 
 
                     if (repository.findByNumeroObra(numeroObra).isPresent()) {
@@ -146,6 +156,18 @@ public class ObraService {
                                 .orElseThrow(() -> new RuntimeException("Base de Saque '" + baseSaqueNome + "' inválida."));
                     }
 
+                    Coordenador coordenador = null;
+                    if (coordenadorNome != null && !coordenadorNome.trim().isEmpty()) {
+                        coordenador = coordenadorRepository.findByUsuario_nomeCompleto(coordenadorNome)
+                                .orElseThrow(() -> new RuntimeException("Coordenador '" + coordenadorNome + "' inválido."));
+                    }
+
+                    Supervisor supervisor = null;
+                    if (supervisorNome != null && !supervisorNome.trim().isEmpty()) {
+                        supervisor = supervisorRepository.findByUsuario_nomeCompleto(supervisorNome)
+                                .orElseThrow(() -> new RuntimeException("Supervisor '" + supervisorNome + "' inválido."));
+                    }
+
 
                     Obra novaObra = new Obra();
                     novaObra.setNumeroObra(numeroObra);
@@ -155,6 +177,10 @@ public class ObraService {
                     novaObra.setBaseSaque(baseSaque); // Pode ser null se for 'NA'
                     novaObra.setDataInicio(dataInicio);
                     novaObra.setDataFim(dataFim);
+                    novaObra.setCoordenador(coordenador);
+                    novaObra.setSupervisor(supervisor);
+                    novaObra.setLatitude(latitude);
+                    novaObra.setLongitude(longitude);
                     novaObra.setDataCriacao(OffsetDateTime.now());
                     novaObra.setAtivo(true);
 
@@ -208,8 +234,8 @@ public class ObraService {
         }
     }
 
-    public Page<ObraResponseDTO> getAllObras(Integer statusId, Integer baseId, String searchTerm, Pageable pageable) {
-        Page<Obra> obraPage = repository.findWithFilters(statusId, baseId, searchTerm, pageable);
+    public Page<ObraResponseDTO> getAllObras(Integer statusId, Integer baseId, Integer coordenadorId, Integer supervisorId, String searchTerm, Pageable pageable) {
+        Page<Obra> obraPage = repository.findWithFilters(statusId, baseId, coordenadorId, supervisorId , searchTerm, pageable);
         return obraPage.map(ObraResponseDTO::new);
     }
 
@@ -218,6 +244,8 @@ public class ObraService {
         Integer baseObraId = dto.baseObra();
         Integer baseSaqueId = dto.baseSaque();
         Integer statusObraId = dto.statusObra();
+        Integer coordenadorId = dto.coordenador();
+        Integer supervisorId = dto.supervisor();
 
         StatusObra statusObra = null;
         if (statusObraId != null) {
@@ -237,15 +265,30 @@ public class ObraService {
                     .orElseThrow(() -> new EntityNotFoundException("Base de Saque não encontrada com o ID: " + baseSaqueId));
         }
 
+        Coordenador coordenador = null;
+        if (coordenadorId != null) {
+            coordenador = coordenadorRepository.findById(coordenadorId)
+                    .orElseThrow(() -> new RuntimeException("Coordenador não encontrado com o ID: " + coordenadorId));
+        }
+
+        Supervisor supervisor = null;
+        if (supervisorId != null) {
+            supervisor = supervisorRepository.findById(supervisorId)
+                    .orElseThrow(() -> new RuntimeException("Supervisor não encontrado com o ID: " + supervisorId));
+        }
+
+
         entity.setNumeroObra(dto.numeroObra());
         entity.setTitulo(dto.titulo());
-        entity.setBaseObra(baseObra); // Pode ser null
-        entity.setBaseSaque(baseSaque); // Pode ser null
+        entity.setBaseObra(baseObra);
+        entity.setBaseSaque(baseSaque);
         entity.setDataInicio(dto.dataInicio());
         entity.setDataFim(dto.dataFim());
         entity.setStatusObra(statusObra);
-
-        // Apenas define a data de criação se for uma nova entidade
+        entity.setCoordenador(coordenador);
+        entity.setSupervisor(supervisor);
+        entity.setLatitude(dto.latitude());
+        entity.setLongitude(dto.longitude());
         if (entity.getDataCriacao() == null) {
             entity.setDataCriacao(OffsetDateTime.now());
         }

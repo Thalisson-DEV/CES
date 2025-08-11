@@ -5,7 +5,6 @@ import com.sipel.CES.choreCadastros.equipes.DTOs.EquipeResponseDTO;
 import com.sipel.CES.choreCadastros.equipes.exceptions.EquipeGlobalException;
 import com.sipel.CES.choreCadastros.equipes.services.EquipeService;
 import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
-import com.sipel.CES.choreCadastros.obras.service.ObraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +21,6 @@ public class EquipeController {
 
     @Autowired
     EquipeService equipeService;
-    @Autowired
-    private ObraService obraService;
 
     @PostMapping
     public ResponseEntity<EquipeResponseDTO> createEquipe(@RequestBody EquipeDTO data) {
@@ -60,8 +57,18 @@ public class EquipeController {
     @DeleteMapping("/{id}")
     public ResponseEntity deleteEquipe(@PathVariable(value = "id") Integer id) {
         try {
-            obraService.deleteObra(id);
+            equipeService.deleteEquipe(id);
             return ResponseEntity.noContent().build();
+        } catch (EquipeGlobalException e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EquipeResponseDTO> getEquipeById(@PathVariable(value = "id") Integer id) {
+        try {
+            EquipeResponseDTO equipeResponseDTO = equipeService.getEquipeById(id);
+            return ResponseEntity.ok().body(equipeResponseDTO);
         } catch (EquipeGlobalException e) {
             throw e;
         }

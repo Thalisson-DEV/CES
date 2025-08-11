@@ -49,7 +49,7 @@ public record EquipeResponseDTO(
 
     public record usuarioDTO(Long id, String user) {
         public usuarioDTO(Usuario usuario) {
-            this(usuario.getId(), usuario.getUsername());
+            this(usuario.getId(), usuario.getNomeCompleto());
         }
     }
 

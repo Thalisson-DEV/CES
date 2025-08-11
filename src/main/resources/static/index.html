@@ -29,10 +29,9 @@
 <!-- ======================= TEMPLATES ============================= -->
 <!-- =============================================================== -->
 
-<!-- Template para a estrutura principal (Layout do Dashboard) -->
 <template id="template-main-app">
   <div class="app-container">
-    <!-- BARRA LATERAL (SIDEBAR) -->
+    <!-- BARRA LATERAL (SIDEBAR) ATUALIZADA -->
     <nav class="sidebar">
       <a href="#/dashboard" class="sidebar-logo">
         <img src="https://placehold.co/40x40/111827/ffffff?text=S" alt="Logo Sipel">
@@ -40,35 +39,48 @@
       <ul class="sidebar-menu">
         <li data-tooltip="Dashboard">
           <a href="#/dashboard" class="sidebar-link" data-menu="dashboard">
-            <i class="ph-bold ph-chart-pie-slice"></i>
+            <!-- Ícone com preenchimento -->
+            <i class="ph-fill ph-chart-pie-slice"></i>
           </a>
         </li>
         <li data-tooltip="Cadastros">
           <a href="#/materials" class="sidebar-link" data-menu="cadastros">
-            <i class="ph-bold ph-folder-plus"></i>
+            <!-- Ícone com preenchimento -->
+            <i class="ph-fill ph-folder-plus"></i>
           </a>
         </li>
-        <li data-tooltip="Solicitações">
-          <a href="#/requests" class="sidebar-link" data-menu="solicitacoes">
-            <i class="ph-bold ph-file-text"></i>
+        <!-- NOVO MENU COMERCIAL -->
+        <li data-tooltip="Comercial">
+          <a href="#/commercial/new-request" class="sidebar-link" data-menu="comercial">
+            <!-- Ícone de alvo com preenchimento -->
+            <i class="ph-fill ph-target"></i>
+          </a>
+        </li>
+        <!-- NOVO MENU TÉCNICO -->
+        <li data-tooltip="Técnico">
+          <a href="#" class="sidebar-link" data-menu="tecnico">
+            <!-- Ícone de raio com preenchimento -->
+            <i class="ph-fill ph-lightning"></i>
           </a>
         </li>
       </ul>
       <div class="sidebar-footer">
         <div data-tooltip="Meu Perfil">
           <a href="#" class="sidebar-link" id="btn-user-profile">
-            <i class="ph-bold ph-user-circle"></i>
+            <!-- Ícone com preenchimento -->
+            <i class="ph-fill ph-user-circle"></i>
           </a>
         </div>
         <div data-tooltip="Sair">
           <a href="#" class="sidebar-link" id="logoutButton">
-            <i class="ph-bold ph-sign-out"></i>
+            <!-- Ícone com preenchimento -->
+            <i class="ph-fill ph-sign-out"></i>
           </a>
         </div>
       </div>
     </nav>
 
-    <!-- PAINEL DO SUBMENU -->
+    <!-- PAINEL DO SUBMENU ATUALIZADO -->
     <div class="submenu-panel">
       <div id="submenu-dashboard" class="submenu-content">
         <h3>Dashboard</h3>
@@ -85,15 +97,23 @@
           <li><a href="#/users" class="page-link">Usuários</a></li>
         </ul>
       </div>
-      <div id="submenu-solicitacoes" class="submenu-content">
-        <h3>Solicitações</h3>
+      <!-- NOVO SUBMENU COMERCIAL -->
+      <div id="submenu-comercial" class="submenu-content">
+        <h3>Comercial</h3>
         <ul>
-          <li><a href="#/requests/new" class="page-link">Nova Solicitação</a></li>
-          <li><a href="#/requests/list" class="page-link">Minhas Solicitações</a></li>
+          <li><a href="#/commercial/new-request" class="page-link">Nova Solicitação</a></li>
+          <li><a href="#/commercial/tracking" class="page-link">Acompanhamento</a></li>
+          <li><a href="#/commercial/reports" class="page-link">Relatórios</a></li>
+        </ul>
+      </div>
+      <!-- NOVO SUBMENU TÉCNICO (EM BRANCO, COMO SOLICITADO) -->
+      <div id="submenu-tecnico" class="submenu-content">
+        <h3>Técnico</h3>
+        <ul>
+          <!-- Links para as páginas do fluxo técnico entrarão aqui no futuro -->
         </ul>
       </div>
     </div>
-
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="main-content">
       <header class="top-bar">
@@ -247,7 +267,7 @@
       <p>Gerencie os projetos e obras da empresa.</p>
     </div>
     <div class="header-actions">
-      <a href="/templates/modelo_obras.xlsx" download class="btn-secondary">
+      <a href="/static/assets/templates/modelo_obras.xlsx" download class="btn-secondary">
         <i class="ph ph-download-simple"></i> Baixar Modelo
       </a>
       <button id="btn-importar-obras" class="btn-secondary">
@@ -260,7 +280,7 @@
     </div>
   </div>
 
-  <!-- NOVA BARRA DE FILTROS -->
+  <!-- BARRA DE FILTROS ATUALIZADA -->
   <div class="filter-bar">
     <div class="filter-group">
       <label for="filter-obra-status">Status</label>
@@ -269,6 +289,15 @@
     <div class="filter-group">
       <label for="filter-obra-base">Base da Obra</label>
       <select id="filter-obra-base"></select>
+    </div>
+    <!-- NOVOS FILTROS -->
+    <div class="filter-group">
+      <label for="filter-obra-coordenador">Coordenador</label>
+      <select id="filter-obra-coordenador"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-obra-supervisor">Supervisor</label>
+      <select id="filter-obra-supervisor"></select>
     </div>
     <div class="filter-group search">
       <label for="busca-obra">Busca por texto</label>
@@ -280,6 +309,7 @@
 
   <div class="table-container">
     <table id="tabela-obras" class="data-table">
+      <!-- CABEÇALHO DA TABELA CORRIGIDO -->
       <thead>
       <tr>
         <th>Nº da Obra</th>
@@ -287,6 +317,8 @@
         <th>Status</th>
         <th>Base da Obra</th>
         <th>Início</th>
+        <th>Coordenador</th>
+        <th>Supervisor</th>
         <th>Ações</th>
       </tr>
       </thead>
@@ -295,9 +327,10 @@
   </div>
   <div id="empty-state-obras" class="empty-state"></div>
 
-  <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
+  <!-- CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-obras"></div>
 </template>
+
 
 <!-- TEMPLATE DE EQUIPES ATUALIZADO -->
 <template id="template-teams">
@@ -388,7 +421,6 @@
     <div class="filter-group search">
       <label for="busca-usuario">Busca por texto</label>
       <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="busca-usuario" placeholder="Nome, login, email...">
       </div>
     </div>
@@ -413,6 +445,65 @@
 
   <!-- CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-usuarios"></div>
+</template>
+
+<template id="template-commercial-tracking">
+  <div class="page-header">
+    <div>
+      <h1>Acompanhamento de Solicitações</h1>
+      <p>Visualize e gerencie todas as solicitações comerciais.</p>
+    </div>
+    <div class="header-actions">
+      <!-- O botão de "Nova Solicitação" pode ser adicionado aqui ou no menu -->
+      <a href="#/commercial/new-request" class="btn-primary">
+        <i class="ph ph-plus"></i> Nova Solicitação
+      </a>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-request-status">Status</label>
+      <select id="filter-request-status"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-request-equipe">Equipe</label>
+      <select id="filter-request-equipe"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-request-solicitante">Solicitante</label>
+      <select id="filter-request-solicitante"></select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-request">Busca por texto</label>
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-request" placeholder="Observações...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-solicitacoes">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Equipe</th>
+        <th>Solicitante</th>
+        <th>Processo</th>
+        <th>Status</th>
+        <th>Data de Criação</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-solicitacoes" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-solicitacoes"></div>
 </template>
 
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->
