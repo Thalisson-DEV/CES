@@ -1,4 +1,4 @@
-package com.sipel.CES.comercial.service;
+package com.sipel.CES.comercial.solicitacoes.service;
 
 import com.sipel.CES.choreCadastros.StatusSolicitacoes.entity.StatusSolicitacoes;
 import com.sipel.CES.choreCadastros.StatusSolicitacoes.repository.StatusSolicitacoesRepository;
@@ -7,17 +7,21 @@ import com.sipel.CES.choreCadastros.equipes.entity.Equipe;
 import com.sipel.CES.choreCadastros.equipes.repository.EquipeRepository;
 import com.sipel.CES.choreCadastros.processos.entity.Processos;
 import com.sipel.CES.choreCadastros.processos.repository.ProcessoRepository;
-import com.sipel.CES.comercial.DTOs.SolicitacaoComercialDTO;
-import com.sipel.CES.comercial.DTOs.SolicitacaoComercialResponseDTO;
-import com.sipel.CES.comercial.entity.SolicitacaoComercial;
-import com.sipel.CES.comercial.repository.SolicitacaoComercialRepository;
+import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialDTO;
+import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialResponseDTO;
+import com.sipel.CES.comercial.solicitacoes.entity.SolicitacaoComercial;
+import com.sipel.CES.comercial.solicitacoes.repository.SolicitacaoComercialRepository;
 import com.sipel.CES.users.entity.Usuario;
 import com.sipel.CES.users.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
 
 @Service
 public class SolicitacaoComercialService {
@@ -43,8 +47,12 @@ public class SolicitacaoComercialService {
     }
 
     public SolicitacaoComercialResponseDTO createSolicitacao(SolicitacaoComercialDTO solicitacao) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+
         SolicitacaoComercial solicitacaoComercialEntity = new SolicitacaoComercial();
-        mapDtoToEntity(solicitacao, solicitacaoComercialEntity);
+        mapDtoToEntity(solicitacao, solicitacaoComercialEntity, usuarioLogado);
+
         repository.save(solicitacaoComercialEntity);
         return new SolicitacaoComercialResponseDTO(solicitacaoComercialEntity);
     }
@@ -52,7 +60,7 @@ public class SolicitacaoComercialService {
     public SolicitacaoComercialResponseDTO updateSolicitacao(Integer id, SolicitacaoComercialDTO data) {
         SolicitacaoComercial solicitacaoComercial = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada"));
-        mapDtoToEntity(data, solicitacaoComercial);
+        mapDtoToEntity(data, solicitacaoComercial, null);
         repository.save(solicitacaoComercial);
         return new SolicitacaoComercialResponseDTO(solicitacaoComercial);
     }
@@ -62,42 +70,25 @@ public class SolicitacaoComercialService {
         return solicitacaoPage.map(SolicitacaoComercialResponseDTO::new);
     }
 
-    public void mapDtoToEntity(SolicitacaoComercialDTO dto, SolicitacaoComercial entity) {
-        Long solicitanteId = Long.valueOf(dto.solicitante());
-        Integer statusId = dto.status();
-        Integer processoId = dto.processo();
-        Integer equipeId = dto.equipe();
+    public void mapDtoToEntity(SolicitacaoComercialDTO dto, SolicitacaoComercial entity, Usuario solicitante) {
+        if (solicitante != null) {
+            entity.setSolicitante(solicitante);
+            StatusSolicitacoes statusInicial = statusSolicitacoesRepository.findById(1)
+                    .orElseThrow(() -> new RuntimeException("Status inicial padrão não encontrado."));
+            entity.setStatus(statusInicial);
 
-        Usuario usuarioSolicitante = null;
-        if (solicitanteId != null) {
-            usuarioSolicitante = usuarioRepository.findById(solicitanteId)
-                    .orElseThrow(() -> new RuntimeException("Solicitante não encontrado"));
+            entity.setDataCriacao(OffsetDateTime.now());
         }
-        entity.setSolicitante(usuarioSolicitante);
 
-        StatusSolicitacoes statusSolicitacao = null;
-        if (statusId != null) {
-            statusSolicitacao = statusSolicitacoesRepository.findById(statusId)
-                    .orElseThrow(() -> new RuntimeException("Status não encontrado"));
-        }
-        entity.setStatus(statusSolicitacao);
-
-        Processos processoSolicitacao = null;
-        if (processoId != null) {
-            processoSolicitacao = processoRepository.findById(processoId)
-                    .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
-        }
+        Processos processoSolicitacao = processoRepository.findById(dto.processo())
+                .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
         entity.setProcesso(processoSolicitacao);
 
-        Equipe equipeSolicitacao = null;
-        if (equipeId != null) {
-            equipeSolicitacao = equipeRepository.findById(equipeId)
-                    .orElseThrow(() -> new RuntimeException("Equipe não encontrada"));
-        }
+        Equipe equipeSolicitacao = equipeRepository.findById(dto.equipe())
+                .orElseThrow(() -> new RuntimeException("Equipe não encontrada"));
         entity.setEquipe(equipeSolicitacao);
 
         entity.setObservacoes(dto.observacoes());
-        entity.setDataCriacao(dto.dataCriacao());
-        entity.setDataModificacao(dto.dataModificacao());
+        entity.setDataModificacao(OffsetDateTime.now()); // Sempre atualiza a data de modificação
     }
 }

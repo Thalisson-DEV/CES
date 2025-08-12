@@ -1,6 +1,6 @@
-package com.sipel.CES.comercial.repository;
+package com.sipel.CES.comercial.solicitacoes.repository;
 
-import com.sipel.CES.comercial.entity.SolicitacaoComercial;
+import com.sipel.CES.comercial.solicitacoes.entity.SolicitacaoComercial;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -22,7 +22,7 @@ public record CoordenadorResponseDTO(
 
     public record UsuarioDTO(Long id, String user) {
         public UsuarioDTO(Usuario usuario) {
-            this(usuario.getId(), usuario.getUsername());
+            this(usuario.getId(), usuario.getNomeCompleto());
         }
     }
 

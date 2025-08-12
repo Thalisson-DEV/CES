@@ -1,4 +1,4 @@
-package com.sipel.CES.comercial.DTOs;
+package com.sipel.CES.comercial.solicitacoes.DTOs;
 
 import java.time.OffsetDateTime;
 

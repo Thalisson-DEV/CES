@@ -132,7 +132,7 @@
 <!-- Template da Página de Login -->
 <template id="template-login">
   <main class="login-card">
-    <img src="https://placehold.co/50x50/0c29de/ffffff?text=S" alt="Logo da Empresa" class="logo">
+    <img src="assets/sipel.png" alt="Logo da Empresa" class="logo">
     <h1>Acesse a Plataforma</h1>
     <p class="subtitle">Bem-vindo de volta! Insira suas credenciais.</p>
     <form id="loginForm" novalidate>
@@ -174,8 +174,8 @@
     <div class="updates-card">
       <h2>Últimas Atualizações</h2>
       <ul>
-        <li><strong>Versão 2.1.0 (UI/UX)</strong><p>Implementado painel lateral para cadastros e melhorias nos estilos de formulário.</p></li>
-        <li><strong>Versão 2.0.0 (SPA)</strong><p>Implementada arquitetura SPA e design unificado.</p></li>
+        <li><strong>Versão 3.1.0 (FEAT)</strong><p>Implementado novo report de solicitações para o comercial.</p></li>
+        <li><strong>Versão 3.0.0 (CHORE)</strong><p>Implementada os cadastros principais da aplicação.</p></li>
       </ul>
     </div>
   </div>
@@ -479,7 +479,6 @@
     <div class="filter-group search">
       <label for="busca-request">Busca por texto</label>
       <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="busca-request" placeholder="Observações...">
       </div>
     </div>
@@ -507,6 +506,152 @@
   <div class="pagination-controls" id="pagination-solicitacoes"></div>
 </template>
 
+
+<template id="template-new-material-request">
+  <div class="page-header">
+    <div>
+      <h1>Nova Solicitação de Materiais</h1>
+      <p id="page-subtitle">Passo 1 de 2: Preencha os detalhes da solicitação.</p>
+    </div>
+  </div>
+
+  <div class="form-container" style="background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 5px; padding: 2rem; box-shadow: var(--shadow-sm);">
+
+    <form id="form-request-header">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="request-equipe">Equipe Responsável*</label>
+          <select id="request-equipe" required></select>
+        </div>
+        <div class="form-group">
+          <label for="request-processo">Processo*</label>
+          <select id="request-processo" required></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="request-observacoes">Observações (opcional)</label>
+        <textarea id="request-observacoes" rows="3" placeholder="Qualquer informação adicional..."></textarea>
+      </div>
+
+      <div class="form-actions" style="border-top: none; padding-top: 0; margin-top: 0; justify-content: flex-start;">
+        <button type="button" id="btn-cancel-header" class="btn-danger">
+          <i class="ph ph-x-circle"></i> Cancelar
+        </button>
+        <button type="button" id="btn-proceed-to-items" class="btn-primary">
+          Prosseguir <i class="ph ph-arrow-right"></i>
+        </button>
+      </div>
+    </form>
+
+    <div id="section-request-items" class="hidden">
+      <hr style="margin: 2.5rem 0; border-color: var(--border-color);">
+
+      <form id="form-add-item">
+        <div class="form-row" style="align-items: flex-end;">
+          <div class="form-group" style="flex-grow: 3;">
+            <label for="search-material-input">Material*</label>
+            <div class="searchable-select-container">
+              <input type="text" id="search-material-input" placeholder="Digite para buscar pelo nome ou código..." autocomplete="off" required>
+              <div id="material-results-dropdown" class="searchable-results-list"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="item-quantity">Quantidade*</label>
+            <input type="number" id="item-quantity" min="0.01" step="any" placeholder="0.00" required>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn-primary" style="width: 100%;">
+              <i class="ph ph-plus"></i> Adicionar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <h3 style="margin-top: 2rem;">Itens da Solicitação</h3>
+      <div class="table-container" style="margin-top: 1rem;">
+        <table class="data-table" id="table-added-items">
+          <thead>
+          <tr>
+            <th>Material</th>
+            <th>Código</th>
+            <th>Quantidade Solicitada</th>
+            <th style="width: 80px;">Ações</th>
+          </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div id="empty-state-items" class="empty-state" style="margin-top:0; border:none; padding: 2rem; display: flex;"></div>
+
+      <div class="form-actions" style="margin-top: 2rem;">
+        <button type="button" id="btn-back-to-header" class="btn-secondary">
+          <i class="ph ph-arrow-left"></i> Voltar ao Cabeçalho
+        </button>
+        <button type="button" id="btn-save-request" class="btn-primary">
+          <i class="ph ph-check-circle"></i> Salvar Solicitação
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="template-commercial-request-details">
+  <div class="page-header">
+    <div>
+      <h1 id="details-page-title">Detalhes da Solicitação</h1>
+      <p>Visualize os itens e gerencie o estado da solicitação.</p>
+    </div>
+    <div class="header-actions">
+      <a href="#/commercial/tracking" class="btn-secondary">
+        <i class="ph ph-arrow-left"></i> Voltar para Acompanhamento
+      </a>
+    </div>
+  </div>
+
+  <!-- Card Principal Unificado -->
+  <main class="form-container max-w-6xl mx-auto">
+    <section class="p-6">
+      <div id="details-header-content" class="principal-card">
+        <!-- Os detalhes serão preenchidos pelo JS -->
+      </div>
+    </section>
+
+    <hr style="margin-bottom: 2rem" class="border-gray-200">
+
+    <!-- Seção 2: Itens da Solicitação -->
+    <section class="p-6">
+
+      <!-- Tabela de itens -->
+      <div class="table-container">
+        <table class="data-table" id="tabela-itens-solicitacao">
+          <thead>
+          <tr>
+            <th>Material</th>
+            <th>Código</th>
+            <th>Status</th>
+            <th>Qtd. Solicitada</th>
+            <th>Qtd. Atendida</th>
+          </tr>
+          </thead>
+          <tbody id="items-table-body">
+          <!-- Itens da solicitação aparecerão aqui -->
+          </tbody>
+        </table>
+      </div>
+      <div id="empty-state-details-items" class="empty-state"></div>
+      <div class="flex items-center gap-2">
+        <button id="btn-edit-items" class="btn-secondary text-sm"><i class="ph ph-pencil-simple"></i> Editar itens</button>
+        <button id="btn-atender-tudo" class="btn-primary btn-success text-sm">Confirmar</button>
+        <button id="btn-rejeitar-tudo" class="btn-danger btn btn-danger text-sm">Rejeitar</button>
+      </div>
+    </section>
+  </main>
+</template>
+
+
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->
 <template id="template-drawer">
   <div class="drawer-overlay"></div>
@@ -520,7 +665,7 @@
     </div>
     <div class="drawer-footer">
       <button class="btn-secondary" id="btn-cancel-drawer">Cancelar</button>
-      <button class="btn-primary" id="btn-save-drawer">Salvar</button>
+      <button class="btn-primary text-sm" id="btn-save-drawer">Salvar</button>
     </div>
   </div>
 </template>
@@ -558,8 +703,8 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn-secondary btn-close-modal">Cancelar</button>
-      <button type="submit" form="profile-form" class="btn-primary">Salvar Alterações</button>
+      <button type="button" class="btn-secondary btn-close-modal text-sm">Cancelar</button>
+      <button type="submit" form="profile-form" class="btn-primary text-sm">Salvar Alterações</button>
     </div>
   </div>
 </div>
@@ -594,10 +739,63 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-primary btn-close-modal">Fechar</button>
+      <button class="btn-primary btn-close-modal text-sm">Fechar</button>
     </div>
   </div>
 </div>
+
+
+<template id="template-edit-items-modal">
+  <div class="modal-overlay visible">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2>Editar Itens da Solicitação</h2>
+        <button class="btn-icon btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulário para adicionar um novo item -->
+        <form id="form-add-item-modal" class="mb-6">
+          <div class="filter-bar p-0 bg-transparent border-none">
+            <div class="filter-group" style="flex-grow: 3;">
+              <label for="modal-search-material-input">Adicionar Material*</label>
+              <div class="searchable-select-container">
+                <input type="text" id="modal-search-material-input" placeholder="Buscar pelo nome ou código..." autocomplete="off" required>
+                <div id="modal-material-results-dropdown" class="searchable-results-list"></div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label for="modal-item-quantity">Quantidade*</label>
+              <input type="number" id="modal-item-quantity" required min="0.01" step="any" class="text-right" placeholder="0.00">
+            </div>
+            <div class="filter-group">
+              <label>&nbsp;</label>
+              <button type="submit" class="btn btn-primary w-full"><i class="ph ph-plus"></i> Adicionar</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Tabela de itens atuais -->
+        <h3 class="form-section-title mb-4">Itens Atuais</h3>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Material</th>
+              <th>Qtd. Solicitada</th>
+              <th class="w-16 text-right">Ações</th>
+            </tr>
+            </thead>
+            <tbody id="modal-items-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-close-modal">Cancelar</button>
+        <button type="button" id="btn-save-item-changes" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+</template>
 
 <!-- CAMINHO CORRIGIDO PARA O SCRIPT PRINCIPAL -->
 <script type="module" src="/assets/js/app.js"></script>

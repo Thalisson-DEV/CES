@@ -35,14 +35,6 @@ public class MaterialService {
         return materialPage.map(MaterialResponseDTO::new);
     }
 
-    /**
-    public List<MaterialResponseDTO> getAllMaterials() {
-        return repository.findAll().stream()
-                .map(MaterialResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-     **/
-
     public MaterialResponseDTO getMaterialById(Integer id) {
         Material material = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Material não encontrado"));
@@ -136,8 +128,8 @@ public class MaterialService {
 
                     Material novoMaterial = new Material();
                     novoMaterial.setCodigoMaterial(codigoMaterial);
-                    novoMaterial.setNomeMaterial(nomeMaterial);
-                    novoMaterial.setDescricao(descricao);
+                    novoMaterial.setNomeMaterial(capitalizeFirstWord(nomeMaterial));
+                    novoMaterial.setDescricao(capitalizeFirstWord(descricao));
                     novoMaterial.setUnidadeMedida(unidadeMedida);
 
                     String suprMatrMaiusculo = suprMatrEnumStr.toUpperCase();
@@ -180,11 +172,18 @@ public class MaterialService {
 
     private void mapDtoToEntity(@NotNull MaterialDTO dto, @NotNull Material entity) {
         entity.setCodigoMaterial(dto.codigoMaterial());
-        entity.setNomeMaterial(dto.nomeMaterial());
-        entity.setDescricao(dto.descricao());
+        entity.setNomeMaterial(capitalizeFirstWord(dto.nomeMaterial()));
+        entity.setDescricao(capitalizeFirstWord(dto.descricao()));
         entity.setUnidadeMedida(dto.unidadeMedida());
         entity.setSuprMatrEnum(dto.suprMatr());
         entity.setAvaliacao(dto.avaliacao());
         entity.setCentro(dto.centro());
+    }
+
+    private static String capitalizeFirstWord(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 }

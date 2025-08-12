@@ -100,6 +100,23 @@ function updateFilter(key, value) {
 }
 
 /**
+ * Retorna a classe CSS correspondente para uma tag de status.
+ * @param {string} statusName - O nome do status.
+ * @returns {string} A classe CSS.
+ */
+function getStatusTagClass(statusName) {
+    if (!statusName) return 'tag-default';
+    const statusLower = statusName.toLowerCase();
+
+    if (statusLower.includes('pendente')) return 'tag-warning';
+    if (statusLower.includes('aprovada') || statusLower.includes('totalmente')) return 'tag-success';
+    if (statusLower.includes('parcialmente')) return 'tag-info';
+    if (statusLower.includes('recusada') || statusLower.includes('cancelada')) return 'tag-danger';
+
+    return 'tag-default';
+}
+
+/**
  * Carrega as solicitações da API.
  */
 async function loadRequests() {
@@ -141,17 +158,19 @@ function renderRequestsTable(requests) {
         requests.forEach(req => {
             const tr = document.createElement('tr');
             const creationDate = new Date(req.dataCriacao).toLocaleString('pt-BR');
-            const reportUrl = `solicitacao-report.html?id=${req.id}`;
+            // ATUALIZAÇÃO: O link agora aponta para a rota da SPA
+            const reportUrl = `#/commercial/request/${req.id}`;
+            const statusTagClass = getStatusTagClass(req.status?.nomeStatus);
 
             tr.innerHTML = `
-                <td><a href="${reportUrl}" target="_blank" class="text-blue-600 hover:underline font-semibold">#${req.id}</a></td>
+                <td><a href="${reportUrl}" class="text-blue-600 hover:underline font-semibold">#${req.id}</a></td>
                 <td>${req.equipe?.nomeEquipe || 'N/A'}</td>
-                <td>${req.solicitante?.nomeCompleto || 'N/A'}</td>
+                <td>${req.solicitante?.user || 'N/A'}</td>
                 <td>${req.processo?.nomeProcesso || 'N/A'}</td>
-                <td><span class="tag">${req.status?.nomeStatus || 'N/A'}</span></td>
+                <td><span class="tag ${statusTagClass}">${req.status?.nomeStatus || 'N/A'}</span></td>
                 <td>${creationDate}</td>
                 <td class="actions">
-                    <a href="${reportUrl}" target="_blank" class="btn-icon" title="Visualizar Relatório" style="color: var(--accent-primary);">
+                    <a href="${reportUrl}" class="btn-icon" title="Visualizar Detalhes" style="color: var(--accent-primary);">
                         <i class="ph ph-magnifying-glass"></i>
                     </a>
                     <button class="btn-icon btn-edit" data-id="${req.id}" title="Editar Solicitação">

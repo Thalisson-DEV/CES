@@ -5,7 +5,10 @@ import { renderWorksPage } from './pages/works.js';
 import { renderTeamsPage } from './pages/teams.js';
 import { renderUsersPage } from './pages/users.js';
 import { renderCommercialTrackingPage } from './pages/commercial-tracking.js';
+import { renderNewCommercialRequestPage } from './pages/new-commercial-request.js';
+import { renderCommercialRequestDetailsPage } from './pages/commercial-request-details.js';
 import { showUserProfileModal, closeAllModals } from './components.js';
+
 
 // Mapeamento de rotas para as funções que renderizam cada página
 const routes = {
@@ -17,6 +20,8 @@ const routes = {
     '/teams': renderTeamsPage,
     '/users': renderUsersPage,
     '/commercial/tracking': renderCommercialTrackingPage,
+    '/commercial/new-request': renderNewCommercialRequestPage,
+    '/commercial/request/:id': renderCommercialRequestDetailsPage,
 };
 
 /**
@@ -40,8 +45,35 @@ const router = () => {
             return;
         }
 
-        const renderFunction = routes[path] || routes['/dashboard'];
-        renderFunction();
+        // Lógica de roteamento atualizada para lidar com parâmetros
+        let match = null;
+        const potentialMatch = Object.keys(routes).find(route => {
+            const routeParts = route.split('/');
+            const pathParts = path.split('/');
+            if (routeParts.length !== pathParts.length) return false;
+
+            const params = {};
+            const isMatch = routeParts.every((part, i) => {
+                if (part.startsWith(':')) {
+                    params[part.slice(1)] = pathParts[i];
+                    return true;
+                }
+                return part === pathParts[i];
+            });
+
+            if (isMatch) {
+                match = { route, params };
+            }
+            return isMatch;
+        });
+
+        if (match) {
+            // Passa os parâmetros para a função de renderização
+            routes[match.route](match.params);
+        } else {
+            // Rota não encontrada, redireciona para o dashboard
+            window.location.hash = '/dashboard';
+        }
 
     } else {
         if (mainLayoutExists) {

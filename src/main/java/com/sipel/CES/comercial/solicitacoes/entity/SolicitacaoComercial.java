@@ -1,4 +1,4 @@
-package com.sipel.CES.comercial.entity;
+package com.sipel.CES.comercial.solicitacoes.entity;
 
 import com.sipel.CES.choreCadastros.StatusSolicitacoes.entity.StatusSolicitacoes;
 import com.sipel.CES.choreCadastros.equipes.entity.Equipe;

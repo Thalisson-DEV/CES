@@ -1,10 +1,9 @@
-package com.sipel.CES.comercial.DTOs;
+package com.sipel.CES.comercial.solicitacoes.DTOs;
 
 import com.sipel.CES.choreCadastros.StatusSolicitacoes.DTOs.StatusSolicitacaoDTO;
-import com.sipel.CES.choreCadastros.equipes.DTOs.EquipeDTO;
 import com.sipel.CES.choreCadastros.equipes.entity.Equipe;
 import com.sipel.CES.choreCadastros.processos.DTOs.ProcessoDTO;
-import com.sipel.CES.comercial.entity.SolicitacaoComercial;
+import com.sipel.CES.comercial.solicitacoes.entity.SolicitacaoComercial;
 import com.sipel.CES.users.entity.Usuario;
 
 import java.time.OffsetDateTime;
