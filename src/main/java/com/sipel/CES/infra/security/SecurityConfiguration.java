@@ -63,9 +63,9 @@ public class SecurityConfiguration {
 
                         // Solicitacoes-Comercial-API
                         .requestMatchers(HttpMethod.GET, "/api/v1/solicitacoes-comercial").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "ESTOQUE", "COMERCIAL", "SUPERVISOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/solicitacoes-comercial").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "COMERCIAL", "SUPERVISOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/solicitacoes-comercial/{id}").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "COMERCIAL", "SUPERVISOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/solicitacoes-comercial/{id}").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "COMERCIAL", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/solicitacoes-comercial").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "ESTOQUE", "COMERCIAL", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/solicitacoes-comercial/{id}").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "ESTOQUE", "COMERCIAL", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/solicitacoes-comercial/{id}").hasAnyRole("ADMINISTRADOR", "COORDENAÇÃO", "ESTOQUE", "COMERCIAL", "SUPERVISOR")
 
                         // AnyResquest, precisa apenas estar authenticado
                         .anyRequest().authenticated()

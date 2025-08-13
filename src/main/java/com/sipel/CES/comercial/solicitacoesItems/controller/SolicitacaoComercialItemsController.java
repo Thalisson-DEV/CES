@@ -37,26 +37,47 @@ public class SolicitacaoComercialItemsController {
     }
 
     @PostMapping("/atender")
-    public ResponseEntity<List<SolicitacaoComercialItemsResponseDTO>> atenderItens(
+    public ResponseEntity<?> atenderItens(
             @PathVariable Integer solicitacaoId,
             @RequestBody(required = false) List<Integer> itemIds) {
-        List<SolicitacaoComercialItemsResponseDTO> itemsAtendidos = itemsService.atenderItens(solicitacaoId, itemIds);
-        return ResponseEntity.ok(itemsAtendidos);
+        try {
+            List<SolicitacaoComercialItemsResponseDTO> itemsAtendidos = itemsService.atenderItens(solicitacaoId, itemIds);
+            if (itemsAtendidos.isEmpty()) {
+                throw new IllegalArgumentException("Nenhum item para atender disponivel.");
+            }
+            return ResponseEntity.ok(itemsAtendidos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
     @PostMapping("/rejeitar")
-    public ResponseEntity<List<SolicitacaoComercialItemsResponseDTO>> rejeitarItens(
+    public ResponseEntity<?> rejeitarItens(
             @PathVariable Integer solicitacaoId,
             @RequestBody(required = false) List<Integer> itemIds) {
-        List<SolicitacaoComercialItemsResponseDTO> itemsRejeitados = itemsService.rejeitarItens(solicitacaoId, itemIds);
-        return ResponseEntity.noContent().build();
+        try {
+            List<SolicitacaoComercialItemsResponseDTO> itemsRejeitados = itemsService.rejeitarItens(solicitacaoId, itemIds);
+            if (itemsRejeitados.isEmpty()) {
+                throw new IllegalArgumentException("Nenhum item para rejeitar disponivel.");
+            }
+            return ResponseEntity.ok(itemsRejeitados);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping
-    public ResponseEntity<List<SolicitacaoComercialItemsResponseDTO>> syncItems(
+    public ResponseEntity<?> syncItems(
             @PathVariable Integer solicitacaoId,
             @RequestBody List<SolicitacaoComercialItemsDTO> itemsDto) {
-        List<SolicitacaoComercialItemsResponseDTO> updatedItems = itemsService.syncItems(solicitacaoId, itemsDto);
-        return ResponseEntity.ok(updatedItems);
+        try {
+            List<SolicitacaoComercialItemsResponseDTO> updatedItems = itemsService.syncItems(solicitacaoId, itemsDto);
+            return ResponseEntity.ok(updatedItems);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+
     }
 }

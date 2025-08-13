@@ -18,6 +18,8 @@ public record EquipeResponseDTO(
         ProcessoDTO processo,
         CoordenadorDTO coordenador,
         SupervisorDTO supervisor,
+        String emailCoordenador,
+        String emailAlmoxarifado,
         OffsetDateTime dataCriacao
 
 ) {
@@ -31,6 +33,8 @@ public record EquipeResponseDTO(
                 equipe.getProcesso() != null ? new ProcessoDTO(equipe.getProcesso()) : null,
                 equipe.getCoordenador() != null ? new CoordenadorDTO(equipe.getCoordenador()) : null,
                 equipe.getSupervisor() != null ? new SupervisorDTO(equipe.getSupervisor()) : null,
+                equipe.getEmailCoordenador(),
+                equipe.getEmailAlmoxarifado(),
                 equipe.getDataCriacao());
     }
 

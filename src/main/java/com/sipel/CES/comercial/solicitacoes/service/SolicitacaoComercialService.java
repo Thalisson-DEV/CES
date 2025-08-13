@@ -5,12 +5,18 @@ import com.sipel.CES.choreCadastros.StatusSolicitacoes.repository.StatusSolicita
 import com.sipel.CES.choreCadastros.basesOperacionais.repository.BaseOperacionalRepository;
 import com.sipel.CES.choreCadastros.equipes.entity.Equipe;
 import com.sipel.CES.choreCadastros.equipes.repository.EquipeRepository;
+import com.sipel.CES.choreCadastros.materiais.entity.Material;
+import com.sipel.CES.choreCadastros.materiais.repository.MaterialRepository;
 import com.sipel.CES.choreCadastros.processos.entity.Processos;
 import com.sipel.CES.choreCadastros.processos.repository.ProcessoRepository;
 import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialDTO;
 import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialResponseDTO;
 import com.sipel.CES.comercial.solicitacoes.entity.SolicitacaoComercial;
 import com.sipel.CES.comercial.solicitacoes.repository.SolicitacaoComercialRepository;
+import com.sipel.CES.comercial.solicitacoesItems.DTOs.SolicitacaoComercialItemsDTO;
+import com.sipel.CES.comercial.solicitacoesItems.entity.SolicitacaoComercialItems;
+import com.sipel.CES.comercial.solicitacoesItems.repository.SolicitacaoComercialItemsRepository;
+import com.sipel.CES.generic.emails.EmailComercialService;
 import com.sipel.CES.users.entity.Usuario;
 import com.sipel.CES.users.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,8 +26,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SolicitacaoComercialService {
@@ -29,7 +39,6 @@ public class SolicitacaoComercialService {
     @Autowired
     private SolicitacaoComercialRepository repository;
     @Autowired
-    //TODO - usar depois
     private BaseOperacionalRepository baseOperacionalRepository;
     @Autowired
     private StatusSolicitacoesRepository statusSolicitacoesRepository;
@@ -39,6 +48,12 @@ public class SolicitacaoComercialService {
     private EquipeRepository equipeRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private EmailComercialService emailComercialService;
+    @Autowired
+    private MaterialRepository materialRepository;
+    @Autowired
+    private SolicitacaoComercialItemsRepository solicitacaoComercialItemsRepository;
 
     public SolicitacaoComercialResponseDTO getSolicitacaoById(Integer id) {
         SolicitacaoComercial solicitacaoComercial = repository.findById(id)
@@ -46,15 +61,36 @@ public class SolicitacaoComercialService {
         return new SolicitacaoComercialResponseDTO(solicitacaoComercial);
     }
 
-    public SolicitacaoComercialResponseDTO createSolicitacao(SolicitacaoComercialDTO solicitacao) {
+    @Transactional
+    public SolicitacaoComercialResponseDTO createSolicitacao(SolicitacaoComercialDTO solicitacaoDto, List<SolicitacaoComercialItemsDTO> itemsDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
 
-        SolicitacaoComercial solicitacaoComercialEntity = new SolicitacaoComercial();
-        mapDtoToEntity(solicitacao, solicitacaoComercialEntity, usuarioLogado);
+        SolicitacaoComercial solicitacaoEntity = new SolicitacaoComercial();
+        mapDtoToEntity(solicitacaoDto, solicitacaoEntity, usuarioLogado);
+        repository.save(solicitacaoEntity);
 
-        repository.save(solicitacaoComercialEntity);
-        return new SolicitacaoComercialResponseDTO(solicitacaoComercialEntity);
+        List<SolicitacaoComercialItems> savedItems = itemsDto.stream().map(itemDto -> {
+            Material material = materialRepository.findById(itemDto.materialId())
+                    .orElseThrow(() -> new EntityNotFoundException("Material não encontrado com o ID: " + itemDto.materialId()));
+
+            SolicitacaoComercialItems itemEntity = new SolicitacaoComercialItems();
+            itemEntity.setSolicitacaoComercialId(solicitacaoEntity);
+            itemEntity.setMaterialId(material);
+            itemEntity.setQuantidadeSolicitada(itemDto.quantidadeSolicitada());
+            itemEntity.setQuantidadeAtendida(BigDecimal.ZERO); // Valor inicial
+            itemEntity.setDataModificacao(OffsetDateTime.now());
+
+            StatusSolicitacoes statusInicialItem = statusSolicitacoesRepository.findById(1)
+                    .orElseThrow(() -> new RuntimeException("Status 'Pendente' (ID 1) não encontrado."));
+            itemEntity.setStatusId(statusInicialItem);
+
+            return solicitacaoComercialItemsRepository.save(itemEntity);
+        }).collect(Collectors.toList());
+
+        emailComercialService.sendNewRequestNotificationEmail(solicitacaoEntity, savedItems);
+
+        return new SolicitacaoComercialResponseDTO(solicitacaoEntity);
     }
 
     public SolicitacaoComercialResponseDTO updateSolicitacao(Integer id, SolicitacaoComercialDTO data) {
@@ -76,8 +112,6 @@ public class SolicitacaoComercialService {
             StatusSolicitacoes statusInicial = statusSolicitacoesRepository.findById(1)
                     .orElseThrow(() -> new RuntimeException("Status inicial padrão não encontrado."));
             entity.setStatus(statusInicial);
-
-            entity.setDataCriacao(OffsetDateTime.now());
         }
 
         Processos processoSolicitacao = processoRepository.findById(dto.processo())
@@ -88,7 +122,12 @@ public class SolicitacaoComercialService {
                 .orElseThrow(() -> new RuntimeException("Equipe não encontrada"));
         entity.setEquipe(equipeSolicitacao);
 
+        if (dto.dataCriacao() != null) {
+            entity.setDataCriacao(dto.dataCriacao());
+        } else {
+            entity.setDataCriacao(OffsetDateTime.now());
+        }
         entity.setObservacoes(dto.observacoes());
-        entity.setDataModificacao(OffsetDateTime.now()); // Sempre atualiza a data de modificação
+        entity.setDataModificacao(OffsetDateTime.now());
     }
 }

@@ -1,5 +1,6 @@
     package com.sipel.CES.comercial.solicitacoes.controller;
 
+    import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialCompletaDTO;
     import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialDTO;
     import com.sipel.CES.comercial.solicitacoes.DTOs.SolicitacaoComercialResponseDTO;
     import com.sipel.CES.comercial.solicitacoes.service.SolicitacaoComercialService;
@@ -17,9 +18,9 @@
         SolicitacaoComercialService service;
 
         @PostMapping
-        public ResponseEntity<?> createSolicitacao(@RequestBody SolicitacaoComercialDTO data) {
+        public ResponseEntity<?> createSolicitacao(@RequestBody SolicitacaoComercialCompletaDTO data) {
             try {
-                SolicitacaoComercialResponseDTO response = service.createSolicitacao(data);
+                SolicitacaoComercialResponseDTO response = service.createSolicitacao(data.solicitacao(), data.itens());
                 return ResponseEntity.status(201).body(response);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(e.getMessage());

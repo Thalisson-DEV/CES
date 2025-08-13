@@ -12,7 +12,7 @@ let addedItems = [];
 let selectedMaterial = null;
 
 /**
- * Renderiza a página de nova solicitação comercial.
+ * Renderiza a página de nova solicitação de materiais.
  */
 export function renderNewCommercialRequestPage() {
     const pageContent = document.getElementById('page-content');
@@ -251,15 +251,18 @@ async function handleSaveRequest() {
         return;
     }
 
-    // CORREÇÃO: Renomeado de 'equipeId' para 'equipe' e 'processoId' para 'processo'
+    // CORREÇÃO: Monta o payload completo com o objeto 'solicitacao' e a lista 'itens'.
     const requestPayload = {
-        equipe: equipeId,
-        processo: processoId,
-        observacoes: document.getElementById('request-observacoes').value,
+        solicitacao: {
+            equipe: equipeId,
+            processo: processoId,
+            observacoes: document.getElementById('request-observacoes').value,
+        },
+        itens: addedItems.map(item => ({
+            materialId: item.materialId,
+            quantidadeSolicitada: item.quantidade
+        }))
     };
-
-    console.log("ENVIANDO PAYLOAD PRINCIPAL:", JSON.stringify(requestPayload, null, 2));
-
     saveButton.disabled = true;
     saveButton.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
 
@@ -282,22 +285,6 @@ async function handleSaveRequest() {
         }
 
         const newRequest = await response.json();
-        const solicitacaoId = newRequest.id;
-
-        // Após criar a solicitação principal, cria os itens
-        const itemPromises = addedItems.map(item => {
-            const itemPayload = {
-                materialId: item.materialId,
-                quantidadeSolicitada: item.quantidade
-            };
-            return fetchAutenticado(`/api/v1/solicitacoes-comercial/${solicitacaoId}/items`, {
-                method: 'POST',
-                body: JSON.stringify(itemPayload)
-            });
-        });
-
-        await Promise.all(itemPromises);
-
         showNotification(`Solicitação #${newRequest.id} criada com sucesso!`, 'success');
         window.location.hash = '/commercial/tracking';
 

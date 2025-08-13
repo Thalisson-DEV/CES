@@ -239,6 +239,8 @@ public class EquipeService {
         entity.setProcesso(processoEquipe);
         entity.setCoordenador(coordenadorEquipe);
         entity.setSupervisor(supervisorEquipe);
+        entity.setEmailCoordenador(dto.emailCoordenador());
+        entity.setEmailAlmoxarifado(dto.emailAlmoxarifado());
         entity.setAtivo(true);
         entity.setDataCriacao(OffsetDateTime.now());
     }

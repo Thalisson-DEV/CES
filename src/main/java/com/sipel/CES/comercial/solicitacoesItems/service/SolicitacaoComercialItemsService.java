@@ -10,6 +10,7 @@ import com.sipel.CES.comercial.solicitacoesItems.DTOs.SolicitacaoComercialItemsD
 import com.sipel.CES.comercial.solicitacoesItems.DTOs.SolicitacaoComercialItemsResponseDTO;
 import com.sipel.CES.comercial.solicitacoesItems.entity.SolicitacaoComercialItems;
 import com.sipel.CES.comercial.solicitacoesItems.repository.SolicitacaoComercialItemsRepository;
+import com.sipel.CES.generic.emails.EmailComercialService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class SolicitacaoComercialItemsService {
     private MaterialRepository materialRepository;
     @Autowired
     private StatusSolicitacoesRepository statusSolicitacoesRepository;
+    @Autowired
+    private EmailComercialService emailComercialService;
 
 
     public List<SolicitacaoComercialItemsResponseDTO> getItemsBySolicitacaoId(Integer solicitacaoId) {
@@ -42,14 +45,18 @@ public class SolicitacaoComercialItemsService {
     }
 
     public SolicitacaoComercialItemsResponseDTO addItem(Integer solicitacaoId, SolicitacaoComercialItemsDTO itemDto) {
-        var solicitacao = solicitacaoRepository.findById(solicitacaoId)
+        SolicitacaoComercial solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada com o ID: " + solicitacaoId));
-        var material = materialRepository.findById(itemDto.materialId())
+        Material material = materialRepository.findById(itemDto.materialId())
                 .orElseThrow(() -> new EntityNotFoundException("Material não encontrado com o ID: " + itemDto.materialId()));
+        StatusSolicitacoes statusSolicitacoes = statusSolicitacoesRepository.findById(1)
+                .orElseThrow(() -> new EntityNotFoundException("Status não encontrado com o ID: " + 2));
+
 
         SolicitacaoComercialItems newItem = new SolicitacaoComercialItems();
         newItem.setSolicitacaoComercialId(solicitacao);
         newItem.setMaterialId(material);
+        newItem.setStatusId(statusSolicitacoes);
         newItem.setQuantidadeSolicitada(itemDto.quantidadeSolicitada());
         newItem.setQuantidadeAtendida(BigDecimal.ZERO);
         newItem.setDataModificacao(OffsetDateTime.now());
@@ -79,22 +86,29 @@ public class SolicitacaoComercialItemsService {
             throw new EntityNotFoundException("Nenhum item válido encontrado para atendimento.");
         }
 
-        StatusSolicitacoes statusAtendido = statusSolicitacoesRepository.findById(2) // Assumindo ID 2 = Aprovada
+        StatusSolicitacoes statusAtendido = statusSolicitacoesRepository.findById(2)
                 .orElseThrow(() -> new RuntimeException("Status 'Aprovada' (ID 2) não encontrado."));
+
+
 
         for (SolicitacaoComercialItems item : itensParaAtender) {
             if (item.getSolicitacaoComercialId().getId() != solicitacaoId) {
                 throw new SecurityException("Tentativa de atender item de outra solicitação.");
+            }
+            if (item.getStatusId().getId() != 1) {
+                throw new IllegalArgumentException("Tentativa de atender uma solicitação concluída.");
             }
             item.setQuantidadeAtendida(item.getQuantidadeSolicitada());
             item.setStatusId(statusAtendido);
             item.setDataModificacao(OffsetDateTime.now());
         }
 
-        itemsRepository.saveAll(itensParaAtender);
+        SolicitacaoComercial solicitacaoPrincipal = solicitacaoRepository.findById(solicitacaoId)
+                .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada."));
 
-        // NOVO: Chama o método para atualizar o status principal
+        itemsRepository.saveAll(itensParaAtender);
         atualizarStatusDaSolicitacaoPrincipal(solicitacaoId);
+        emailComercialService.sendAcceptedRequestNotificationEmail(solicitacaoPrincipal, itensParaAtender);
 
         return itensParaAtender.stream()
                 .map(SolicitacaoComercialItemsResponseDTO::new)
@@ -115,22 +129,27 @@ public class SolicitacaoComercialItemsService {
             throw new EntityNotFoundException("Nenhum item válido encontrado para rejeição.");
         }
 
-        StatusSolicitacoes statusRejeitado = statusSolicitacoesRepository.findById(3) // Assumindo ID 3 = Recusada
+        StatusSolicitacoes statusRejeitado = statusSolicitacoesRepository.findById(3)
                 .orElseThrow(() -> new RuntimeException("Status 'Recusada' (ID 3) não encontrado."));
 
         for (SolicitacaoComercialItems item : itensParaRejeitar) {
             if (item.getSolicitacaoComercialId().getId() != solicitacaoId) {
                 throw new SecurityException("Tentativa de rejeitar item de outra solicitação.");
             }
+            if (item.getStatusId().getId() != 1) {
+                throw new IllegalArgumentException("Tentativa de recusar uma solicitação concluída.");
+            }
             item.setQuantidadeAtendida(BigDecimal.ZERO);
             item.setStatusId(statusRejeitado);
             item.setDataModificacao(OffsetDateTime.now());
         }
 
-        itemsRepository.saveAll(itensParaRejeitar);
+        SolicitacaoComercial solicitacaoPrincipal = solicitacaoRepository.findById(solicitacaoId)
+                .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada."));
 
-        // NOVO: Chama o método para atualizar o status principal
+        itemsRepository.saveAll(itensParaRejeitar);
         atualizarStatusDaSolicitacaoPrincipal(solicitacaoId);
+        emailComercialService.sendRejectedRequestNotificationEmail(solicitacaoPrincipal, itensParaRejeitar);
 
         return itensParaRejeitar.stream()
                 .map(SolicitacaoComercialItemsResponseDTO::new)
@@ -170,6 +189,11 @@ public class SolicitacaoComercialItemsService {
     public List<SolicitacaoComercialItemsResponseDTO> syncItems(Integer solicitacaoId, List<SolicitacaoComercialItemsDTO> dtos) {
         SolicitacaoComercial solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada com o ID: " + solicitacaoId));
+
+        if (solicitacao.getStatus().getId() != 1) {
+            throw new IllegalArgumentException("Não é possível editar uma solicitação que não esta mais pendente.");
+        }
+
 
         Map<Integer, SolicitacaoComercialItemsDTO> dtoMap = dtos.stream()
                 .collect(Collectors.toMap(SolicitacaoComercialItemsDTO::materialId, Function.identity()));
