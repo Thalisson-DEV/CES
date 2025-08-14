@@ -103,6 +103,6 @@ Este projeto está em desenvolvimento. Contribuições, sugestões e feedbacks s
 👤 Contato
 Thalisson Damião
 
-LinkedIn: https://www.linkedin.com/in/seu-perfil
+LinkedIn: www.linkedin.com/in/thalisson-damião-108a1732b
 
 Email: thalissondamiao1@gmail.com
