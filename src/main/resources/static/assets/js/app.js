@@ -7,6 +7,8 @@ import { renderUsersPage } from './pages/users.js';
 import { renderCommercialTrackingPage } from './pages/commercial-tracking.js';
 import { renderNewCommercialRequestPage } from './pages/new-commercial-request.js';
 import { renderCommercialRequestDetailsPage } from './pages/commercial-request-details.js';
+import { renderCommercialApprovalsPage } from './pages/commercial-approvals.js';
+import { renderCommercialApprovalsDetailsPage } from './pages/commercial-approvals-details.js';
 import { showUserProfileModal, closeAllModals } from './components.js';
 
 
@@ -22,6 +24,8 @@ const routes = {
     '/commercial/tracking': renderCommercialTrackingPage,
     '/commercial/new-request': renderNewCommercialRequestPage,
     '/commercial/request/:id': renderCommercialRequestDetailsPage,
+    '/commercial/approvals': renderCommercialApprovalsPage,
+    '/commercial/approvals/:id': renderCommercialApprovalsDetailsPage,
 };
 
 /**

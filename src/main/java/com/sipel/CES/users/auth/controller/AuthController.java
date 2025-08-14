@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.OffsetDateTime;
-
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -34,9 +32,11 @@ public class AuthController {
         var usuarioPassword = new UsernamePasswordAuthenticationToken(data.user(), data.senhaHash());
         var auth = this.authenticationManager.authenticate(usuarioPassword);
 
+        Usuario authUser = (Usuario) auth.getPrincipal();
+
         var token = tokenService.generateToken((Usuario) auth.getPrincipal());
 
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(new LoginResponseDTO(token, authUser.getUsername(), authUser.getNomeCompleto(), authUser.getEmail()));
     }
 
     @PostMapping("/register")

@@ -50,7 +50,28 @@ public class SolicitacaoComercialItemsService {
         Material material = materialRepository.findById(itemDto.materialId())
                 .orElseThrow(() -> new EntityNotFoundException("Material não encontrado com o ID: " + itemDto.materialId()));
         StatusSolicitacoes statusSolicitacoes = statusSolicitacoesRepository.findById(1)
-                .orElseThrow(() -> new EntityNotFoundException("Status não encontrado com o ID: " + 2));
+                .orElseThrow(() -> new EntityNotFoundException("Status não encontrado com o ID: " + 1));
+
+
+        SolicitacaoComercialItems newItem = new SolicitacaoComercialItems();
+        newItem.setSolicitacaoComercialId(solicitacao);
+        newItem.setMaterialId(material);
+        newItem.setStatusId(statusSolicitacoes);
+        newItem.setQuantidadeSolicitada(itemDto.quantidadeSolicitada());
+        newItem.setQuantidadeAtendida(BigDecimal.ZERO);
+        newItem.setDataModificacao(OffsetDateTime.now());
+
+        itemsRepository.save(newItem);
+        return new SolicitacaoComercialItemsResponseDTO(newItem);
+    }
+
+    public SolicitacaoComercialItemsResponseDTO addItemRequest(Integer solicitacaoId, SolicitacaoComercialItemsDTO itemDto) {
+        SolicitacaoComercial solicitacao = solicitacaoRepository.findById(solicitacaoId)
+                .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada com o ID: " + solicitacaoId));
+        Material material = materialRepository.findById(itemDto.materialId())
+                .orElseThrow(() -> new EntityNotFoundException("Material não encontrado com o ID: " + itemDto.materialId()));
+        StatusSolicitacoes statusSolicitacoes = statusSolicitacoesRepository.findById(7)
+                .orElseThrow(() -> new EntityNotFoundException("Status não encontrado com o ID: " + 7));
 
 
         SolicitacaoComercialItems newItem = new SolicitacaoComercialItems();
@@ -116,6 +137,44 @@ public class SolicitacaoComercialItemsService {
     }
 
     @Transactional
+    public List<SolicitacaoComercialItemsResponseDTO> aprovarItensRequest(Integer solicitacaoId, List<Integer> itemIds) {
+        List<SolicitacaoComercialItems> itensParaAtender;
+
+        if (itemIds == null || itemIds.isEmpty()) {
+            itensParaAtender = itemsRepository.findBySolicitacaoComercialId_Id(solicitacaoId);
+        } else {
+            itensParaAtender = itemsRepository.findAllById(itemIds);
+        }
+
+        if (itensParaAtender.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum item válido encontrado para atendimento.");
+        }
+
+        StatusSolicitacoes statusAtendido = statusSolicitacoesRepository.findById(1)
+                .orElseThrow(() -> new RuntimeException("Status 'Pendente' (ID 1) não encontrado."));
+
+
+
+        for (SolicitacaoComercialItems item : itensParaAtender) {
+            if (item.getSolicitacaoComercialId().getId() != solicitacaoId) {
+                throw new SecurityException("Tentativa de atender item de outra solicitação.");
+            }
+            if (item.getStatusId().getId() != 7) {
+                throw new IllegalArgumentException("Tentativa de atender uma solicitação concluída.");
+            }
+            item.setStatusId(statusAtendido);
+            item.setDataModificacao(OffsetDateTime.now());
+        }
+
+        itemsRepository.saveAll(itensParaAtender);
+        atualizarStatusDaSolicitacaoPrincipal(solicitacaoId);
+
+        return itensParaAtender.stream()
+                .map(SolicitacaoComercialItemsResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public List<SolicitacaoComercialItemsResponseDTO> rejeitarItens(Integer solicitacaoId, List<Integer> itemIds) {
         List<SolicitacaoComercialItems> itensParaRejeitar;
 
@@ -156,27 +215,76 @@ public class SolicitacaoComercialItemsService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<SolicitacaoComercialItemsResponseDTO> rejeitarItensRequest(Integer solicitacaoId, List<Integer> itemIds) {
+        List<SolicitacaoComercialItems> itensParaRejeitar;
+
+        if (itemIds == null || itemIds.isEmpty()) {
+            itensParaRejeitar = itemsRepository.findBySolicitacaoComercialId_Id(solicitacaoId);
+        } else {
+            itensParaRejeitar = itemsRepository.findAllById(itemIds);
+        }
+
+        if (itensParaRejeitar.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum item válido encontrado para rejeição.");
+        }
+
+        StatusSolicitacoes statusSolicitacoes = statusSolicitacoesRepository.findById(7)
+                .orElseThrow(() -> new EntityNotFoundException("Solicitação principal não encontrada."));
+
+        for (SolicitacaoComercialItems item : itensParaRejeitar) {
+            if (item.getSolicitacaoComercialId().getId() != solicitacaoId) {
+                throw new SecurityException("Tentativa de rejeitar item de outra solicitação.");
+            }
+            if (item.getStatusId().getId() != 7) {
+                throw new IllegalArgumentException("Tentativa de recusar uma solicitação concluída.");
+            }
+            item.setQuantidadeAtendida(BigDecimal.ZERO);
+            item.setStatusId(statusSolicitacoes);
+            item.setDataModificacao(OffsetDateTime.now());
+        }
+
+        itemsRepository.deleteAll(itensParaRejeitar);
+        solicitacaoRepository.deleteById(solicitacaoId);
+
+        return itensParaRejeitar.stream()
+                .map(SolicitacaoComercialItemsResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
 
     private void atualizarStatusDaSolicitacaoPrincipal(Integer solicitacaoId) {
         SolicitacaoComercial solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada para atualização de status."));
 
         List<SolicitacaoComercialItems> itens = itemsRepository.findBySolicitacaoComercialId_Id(solicitacaoId);
+        solicitacao.setDataModificacao(OffsetDateTime.now());
 
         if (itens.isEmpty()) {
             StatusSolicitacoes statusCancelado = statusSolicitacoesRepository.findById(6)
                     .orElseThrow(() -> new RuntimeException("Status 'Cancelada' não encontrado."));
             solicitacao.setStatus(statusCancelado);
         } else {
-            boolean todosAtendidos = itens.stream()
-                    .allMatch(item -> "Aprovada".equalsIgnoreCase(item.getStatusId().getNomeStatus()));
+            long totalItens = itens.size();
+            long itensAprovados = itens.stream()
+                    .filter(item -> "Aprovada".equalsIgnoreCase(item.getStatusId().getNomeStatus()))
+                    .count();
+            long itensRecusados = itens.stream()
+                    .filter(item -> "Recusada".equalsIgnoreCase(item.getStatusId().getNomeStatus()))
+                    .count();
 
-            if (todosAtendidos) {
-                StatusSolicitacoes statusTotal = statusSolicitacoesRepository.findById(2)
-                        .orElseThrow(() -> new RuntimeException("Status 'Aprovado' não encontrado."));
-                solicitacao.setStatus(statusTotal);
+            if (itensAprovados == totalItens) {
+                StatusSolicitacoes statusAprovado = statusSolicitacoesRepository.findById(2)
+                        .orElseThrow(() -> new RuntimeException("Status 'Aprovada' não encontrado."));
+                solicitacao.setStatus(statusAprovado);
+
+            } else if (itensRecusados == totalItens) {
+                StatusSolicitacoes statusRecusado = statusSolicitacoesRepository.findById(3)
+                        .orElseThrow(() -> new RuntimeException("Status 'Recusada' não encontrado."));
+                solicitacao.setStatus(statusRecusado);
+
             } else {
-                StatusSolicitacoes statusPendente = statusSolicitacoesRepository.findById(3)
+                StatusSolicitacoes statusPendente = statusSolicitacoesRepository.findById(1)
                         .orElseThrow(() -> new RuntimeException("Status 'Pendente' não encontrado."));
                 solicitacao.setStatus(statusPendente);
             }

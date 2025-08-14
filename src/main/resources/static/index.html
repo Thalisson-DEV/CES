@@ -102,7 +102,8 @@
       <div id="submenu-comercial" class="submenu-content">
         <h3>Comercial</h3>
         <ul>
-          <li><a href="#/commercial/new-request" class="page-link">Nova Solicitação</a></li>
+          <li><a href="#/commercial/new-request" class="page-link">Solicitação Operacional</a></li>
+          <li><a href="#/commercial/approvals" class="page-link">Controle de Solicitações</a></li>
           <li><a href="#/commercial/tracking" class="page-link">Acompanhamento</a></li>
           <li><a href="#/commercial/reports" class="page-link">Relatórios</a></li>
         </ul>
@@ -593,6 +594,53 @@
   </div>
 </template>
 
+<template id="template-commercial-approvals">
+  <div class="page-header">
+    <div>
+      <h1>Aprovação de Solicitações</h1>
+      <p>Analise e aprove as novas solicitações enviadas pelas equipes.</p>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-approval-equipe">Equipe</label>
+      <select id="filter-approval-equipe"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-approval-solicitante">Solicitante</label>
+      <select id="filter-approval-solicitante"></select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-approval">Busca por texto</label>
+      <div class="search-container">
+        <input type="text" id="busca-approval" placeholder="Observações...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-aprovacoes">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Equipe</th>
+        <th>Solicitante</th>
+        <th>Processo</th>
+        <th>Data de Criação</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-aprovacoes" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-aprovacoes"></div>
+</template>
+
 <template id="template-commercial-request-details">
   <div class="page-header">
     <div>
@@ -642,6 +690,51 @@
         <button id="btn-atender-tudo" class="btn-primary btn-success text-sm">Confirmar</button>
         <button id="btn-rejeitar-tudo" class="btn-danger btn btn-danger text-sm">Rejeitar</button>
       </div>
+    </section>
+  </main>
+</template>
+
+<template id="template-commercial-approvals-details">
+  <div class="page-header">
+    <div>
+      <h1 id="approval-page-title">Análise da Solicitação</h1>
+      <p>Verifique os itens e aprove ou recuse a solicitação.</p>
+    </div>
+    <div class="header-actions">
+      <a href="#/commercial/approvals" class="btn btn-secondary">
+        <i class="ph ph-arrow-left"></i> Voltar para Aprovações
+      </a>
+    </div>
+  </div>
+
+  <!-- Card Principal Unificado -->
+  <main class="form-container max-w-6xl mx-auto">
+    <!-- Seção 1: Detalhes da Solicitação -->
+    <section class="p-6">
+      <div id="approval-header-content" class="principal-card"></div>
+    </section>
+
+    <!-- Seção 2: Itens da Solicitação -->
+    <hr style="margin-bottom: 2rem" class="border-gray-200">
+    <section class="p-6">
+
+      <!-- Tabela de itens -->
+      <div class="table-container">
+        <table class="data-table" id="tabela-itens-aprovacao">
+          <thead>
+          <tr>
+            <th>Material</th>
+            <th>Código</th>
+            <th>Qtd. Solicitada</th>
+          </tr>
+          </thead>
+          <tbody id="approval-items-table-body"></tbody>
+        </table>
+      </div>
+      <div id="empty-state-approval-items" class="empty-state"></div>
+      <button id="btn-edit-request" class="btn-secondary text-sm"><i class="ph ph-pencil-simple"></i> Editar itens</button>
+      <button id="btn-approve-all" class="btn-primary btn-success text-sm">Confirmar</button>
+      <button id="btn-reject-all" class="btn-danger btn btn-danger text-sm">Rejeitar</button>
     </section>
   </main>
 </template>

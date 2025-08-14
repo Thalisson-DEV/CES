@@ -49,7 +49,21 @@ public class SolicitacaoComercialItemsController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
+    @PostMapping("/request/aprovar")
+    public ResponseEntity<?> aprovarRequests(
+            @PathVariable Integer solicitacaoId,
+            @RequestBody(required = false) List<Integer> itemIds) {
+        try {
+            List<SolicitacaoComercialItemsResponseDTO> itemsAtendidos = itemsService.aprovarItensRequest(solicitacaoId, itemIds);
+            if (itemsAtendidos.isEmpty()) {
+                throw new IllegalArgumentException("Nenhum item para atender disponivel.");
+            }
+            return ResponseEntity.ok(itemsAtendidos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/rejeitar")
@@ -58,6 +72,21 @@ public class SolicitacaoComercialItemsController {
             @RequestBody(required = false) List<Integer> itemIds) {
         try {
             List<SolicitacaoComercialItemsResponseDTO> itemsRejeitados = itemsService.rejeitarItens(solicitacaoId, itemIds);
+            if (itemsRejeitados.isEmpty()) {
+                throw new IllegalArgumentException("Nenhum item para rejeitar disponivel.");
+            }
+            return ResponseEntity.ok(itemsRejeitados);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/request/rejeitar")
+    public ResponseEntity<?> rejeitarRequests(
+            @PathVariable Integer solicitacaoId,
+            @RequestBody(required = false) List<Integer> itemIds) {
+        try {
+            List<SolicitacaoComercialItemsResponseDTO> itemsRejeitados = itemsService.rejeitarItensRequest(solicitacaoId, itemIds);
             if (itemsRejeitados.isEmpty()) {
                 throw new IllegalArgumentException("Nenhum item para rejeitar disponivel.");
             }

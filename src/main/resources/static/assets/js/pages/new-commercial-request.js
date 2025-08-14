@@ -286,7 +286,7 @@ async function handleSaveRequest() {
 
         const newRequest = await response.json();
         showNotification(`Solicitação #${newRequest.id} criada com sucesso!`, 'success');
-        window.location.hash = '/commercial/tracking';
+        window.location.hash = '/commercial/approvals';
 
     } catch (error) {
         showNotification(error.message, 'error');

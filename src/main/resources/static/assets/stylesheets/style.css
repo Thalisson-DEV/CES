@@ -420,7 +420,7 @@ a {
 .tag.tag-warning, .data-table .tag.tag-warning {
     border: 1px solid transparent;
     border-radius: 30px;
-    padding: 0.2rem;
+    padding: 0.2rem 0.5rem;
     background-color: #fffbeb; /* Amarelo claro */
     color: #b45309; /* Amarelo escuro */
 }
@@ -736,7 +736,6 @@ a {
 
     /* Remove a aparência padrão do navegador */
     -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
 
     /* Adiciona uma seta customizada como imagem de fundo */
@@ -837,6 +836,19 @@ a {
 #btn-edit-items {
     margin-top: 1rem;
 }
+
+#btn-edit-request {
+    margin-top: 1rem;
+}
+
+#btn-approve-all {
+    margin-top: 1rem;
+}
+
+#btn-reject-all {
+    margin-top: 1rem;
+}
+
 
 /* Estilos para o Select com Busca */
 .searchable-select-container {

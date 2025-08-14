@@ -78,11 +78,11 @@ public class SolicitacaoComercialService {
             itemEntity.setSolicitacaoComercialId(solicitacaoEntity);
             itemEntity.setMaterialId(material);
             itemEntity.setQuantidadeSolicitada(itemDto.quantidadeSolicitada());
-            itemEntity.setQuantidadeAtendida(BigDecimal.ZERO); // Valor inicial
+            itemEntity.setQuantidadeAtendida(BigDecimal.ZERO);
             itemEntity.setDataModificacao(OffsetDateTime.now());
 
-            StatusSolicitacoes statusInicialItem = statusSolicitacoesRepository.findById(1)
-                    .orElseThrow(() -> new RuntimeException("Status 'Pendente' (ID 1) não encontrado."));
+            StatusSolicitacoes statusInicialItem = statusSolicitacoesRepository.findById(7)
+                    .orElseThrow(() -> new RuntimeException("Status 'Solicitado' (ID 7) não encontrado."));
             itemEntity.setStatusId(statusInicialItem);
 
             return solicitacaoComercialItemsRepository.save(itemEntity);
@@ -106,12 +106,26 @@ public class SolicitacaoComercialService {
         return solicitacaoPage.map(SolicitacaoComercialResponseDTO::new);
     }
 
+    public Page<SolicitacaoComercialResponseDTO> getAllResquests(Integer equipeId, Long solicitanteId, Integer statusId,Integer processoId, String searchTerm, Pageable pageable) {
+        Page<SolicitacaoComercial> solicitacaoPage = repository.findRequestedWithFilters(equipeId, solicitanteId, statusId ,processoId, searchTerm, pageable);
+        return solicitacaoPage.map(SolicitacaoComercialResponseDTO::new);
+    }
+
     public void mapDtoToEntity(SolicitacaoComercialDTO dto, SolicitacaoComercial entity, Usuario solicitante) {
         if (solicitante != null) {
             entity.setSolicitante(solicitante);
-            StatusSolicitacoes statusInicial = statusSolicitacoesRepository.findById(1)
-                    .orElseThrow(() -> new RuntimeException("Status inicial padrão não encontrado."));
+        }
+
+        Integer statusId = dto.status();
+
+        if (solicitante != null || statusId == null) {
+            StatusSolicitacoes statusInicial = statusSolicitacoesRepository.findById(7)
+                    .orElseThrow(() -> new RuntimeException("Status inicial 'Solicitado' (ID 7) não encontrado."));
             entity.setStatus(statusInicial);
+        } else {
+            StatusSolicitacoes statusAtualizado = statusSolicitacoesRepository.findById(statusId)
+                    .orElseThrow(() -> new RuntimeException("Status não encontrado com o ID: " + statusId));
+            entity.setStatus(statusAtualizado);
         }
 
         Processos processoSolicitacao = processoRepository.findById(dto.processo())
@@ -124,10 +138,12 @@ public class SolicitacaoComercialService {
 
         if (dto.dataCriacao() != null) {
             entity.setDataCriacao(dto.dataCriacao());
-        } else {
+        } else if (entity.getDataCriacao() == null) {
             entity.setDataCriacao(OffsetDateTime.now());
         }
+
         entity.setObservacoes(dto.observacoes());
         entity.setDataModificacao(OffsetDateTime.now());
     }
+
 }

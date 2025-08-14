@@ -39,6 +39,18 @@
             return ResponseEntity.ok(solicitacoes);
         }
 
+        @GetMapping("/requested")
+        public ResponseEntity<Page<SolicitacaoComercialResponseDTO>> getAllSolicitacoesComerciaisRequests(
+                @RequestParam(required = false) Integer equipeId,
+                @RequestParam(required = false) Long solicitanteId,
+                @RequestParam(required = false) Integer statusId,
+                @RequestParam(required = false) Integer processoId,
+                @RequestParam(required = false) String searchTerm,
+                Pageable pageable) {
+            Page<SolicitacaoComercialResponseDTO> solicitacoes = service.getAllResquests(equipeId, solicitanteId, processoId, statusId,searchTerm, pageable);
+            return ResponseEntity.ok(solicitacoes);
+        }
+
         @GetMapping("/{id}")
         public ResponseEntity<SolicitacaoComercialResponseDTO> getSolicitacaoById(@PathVariable(value = "id") Integer id) {
             try {

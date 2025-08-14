@@ -1,0 +1,1 @@
+INSERT INTO status_solicitacao (nome_status) VALUES ('Solicitado');
