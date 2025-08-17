@@ -108,7 +108,7 @@ a {
 }
 
 .app-container.submenu-open {
-    grid-template-columns: 80px 240px 1fr;
+    grid-template-columns: 80px 280px 1fr;
 }
 
 /* --- 4. SIDEBAR (BARRA LATERAL) --- */
@@ -235,6 +235,68 @@ a {
 .submenu-content a:hover, .submenu-content a.active {
     background-color: var(--accent-primary);
     color: var(--text-light);
+}
+
+.submenu-menu {
+    list-style: none;
+    width: 100%;
+}
+
+.submenu-dropdown-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 0.8rem;
+    margin-bottom: 0.25rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600; /* Destaque para o item principal */
+    color: var(--text-light);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: var(--transition-fast);
+}
+
+.submenu-dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.submenu-dropdown-toggle i {
+    font-size: 16px;
+    transition: transform var(--transition-medium);
+}
+
+/* Rotação do ícone quando o menu está aberto */
+.submenu-dropdown-toggle.open i {
+    transform: rotate(180deg);
+}
+
+.submenu-dropdown-content {
+    list-style: none;
+    padding-left: 1rem; /* Indentação para os sub-itens */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+}
+
+/* Expansão do menu quando a classe .open é aplicada */
+.submenu-dropdown-toggle.open + .submenu-dropdown-content {
+    max-height: 500px;
+}
+
+/* Estilo dos links dentro do dropdown */
+.submenu-dropdown-content a {
+    color: var(--text-links);
+    font-weight: 500;
+}
+
+.submenu-dropdown-content a:hover,
+.submenu-dropdown-content a.active {
+    color: var(--text-light);
+    background-color: var(--accent-primary);
 }
 
 /* --- 6. CONTEÚDO PRINCIPAL --- */

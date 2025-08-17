@@ -28,4 +28,8 @@ public record EquipeDTO(
         @NotBlank
         OffsetDateTime dataCriacao
 ) {
+
+        public EquipeDTO(Equipe equipe) {
+                this(equipe.getNomeEquipe(), equipe.getVulgo(), equipe.isAtivo(), equipe.getBaseOperacional().getId(), equipe.getProcesso().getId(), equipe.getSupervisor().getId(), equipe.getCoordenador().getId(), equipe.getEmailCoordenador(), equipe.getEmailAlmoxarifado(), equipe.getDataCriacao());
+        }
 }

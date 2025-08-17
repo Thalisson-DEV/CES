@@ -1,4 +1,4 @@
-package com.sipel.CES.comercial.notas.aplicacoes.tipoAplicacoes.entity;
+package com.sipel.CES.comercial.aplicacoes.tipoAplicacoes.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity(name = "TipoAplicacoes")
-@Table(name = "tipo_aplicacoes")
+@Table(name = "tipos_aplicacao")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -101,11 +101,31 @@
       <!-- NOVO SUBMENU COMERCIAL -->
       <div id="submenu-comercial" class="submenu-content">
         <h3>Comercial</h3>
-        <ul>
-          <li><a href="#/commercial/new-request" class="page-link">Solicitação Operacional</a></li>
-          <li><a href="#/commercial/approvals" class="page-link">Controle de Solicitações</a></li>
-          <li><a href="#/commercial/tracking" class="page-link">Acompanhamento</a></li>
-          <li><a href="#/commercial/reports" class="page-link">Relatórios</a></li>
+        <ul class="submenu-menu">
+          <!-- Item Principal 1: Estoque Operacional -->
+          <li>
+            <button class="submenu-dropdown-toggle">
+              <span>Estoque Operacional</span>
+              <i class="ph ph-caret-down"></i>
+            </button>
+            <ul class="submenu-dropdown-content">
+              <li><a href="#/commercial/new-request" class="page-link">Solicitação Operacional</a></li>
+              <li><a href="#/commercial/approvals" class="page-link">Triagem de Solicitações</a></li>
+              <li><a href="#/commercial/material-tracking" class="page-link">Acompanhamento Final</a></li>
+              <li><a href="#/commercial/reports" class="page-link">Saldo</a></li>
+            </ul>
+          </li>
+          <li>
+            <button class="submenu-dropdown-toggle">
+              <span>Produtividade</span>
+              <i class="ph ph-caret-down"></i>
+            </button>
+            <ul class="submenu-dropdown-content">
+              <li><a href="#/commercial/new-note" class="page-link">Lançar Nota de Campo</a></li>
+              <li><a href="#/commercial/note-tracking" class="page-link">Consultar Notas</a></li>
+              <!-- Adicionar outros links de produtividade aqui -->
+            </ul>
+          </li>
         </ul>
       </div>
       <!-- NOVO SUBMENU TÉCNICO (EM BRANCO, COMO SOLICITADO) -->
@@ -153,10 +173,10 @@
     <p>Seja bem-vindo de volta, Usuário.</p>
   </div>
   <div class="kpi-grid">
-    <div class="kpi-card"><span>12</span>Solicitações Pendentes</div>
-    <div class="kpi-card"><span>4</span>Obras Ativas</div>
-    <div class="kpi-card"><span>8</span>Itens em Estoque Baixo</div>
-    <div class="kpi-card"><span>127</span>Atendimentos no Mês</div>
+    <div class="kpi-card"><span>--</span>Solicitações Pendentes</div>
+    <div class="kpi-card"><span>--</span>Obras Ativas</div>
+    <div class="kpi-card"><span>--</span>Itens em Estoque Baixo</div>
+    <div class="kpi-card"><span>--</span>Atendimentos no Mês</div>
   </div>
   <div class="dashboard-grid">
     <div class="quick-links-card">
@@ -648,7 +668,7 @@
       <p>Visualize os itens e gerencie o estado da solicitação.</p>
     </div>
     <div class="header-actions">
-      <a href="#/commercial/tracking" class="btn-secondary">
+      <a href="#/commercial/material-tracking" class="btn-secondary">
         <i class="ph ph-arrow-left"></i> Voltar para Acompanhamento
       </a>
     </div>
@@ -739,6 +759,117 @@
   </main>
 </template>
 
+
+<template id="template-new-field-note">
+  <div class="page-header">
+    <div>
+      <h1>Lançamento de Nota de Campo</h1>
+      <p id="note-page-subtitle">Passo 1 de 2: Preencha os detalhes da nota.</p>
+    </div>
+  </div>
+
+  <main class="form-container max-w-6xl mx-auto">
+    <!-- Seção 1: Detalhes da Nota (Cabeçalho) -->
+    <section id="note-header-section" class="p-6">
+      <form id="form-main-note">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="note-number">Número da Nota*</label>
+            <input type="text" id="note-number" required placeholder="Ex: OS12345">
+          </div>
+          <div class="form-group">
+            <label for="note-type">Tipo de Nota*</label>
+            <select id="note-type" required></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="search-equipe-input">Equipe Responsável*</label>
+            <div class="searchable-select-container">
+              <input type="text" id="search-equipe-input" placeholder="Digite para buscar a equipe..." autocomplete="off" required>
+              <div id="equipe-results-dropdown" class="searchable-results-list"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="note-base">Base Operacional*</label>
+            <select id="note-base" required></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="note-observacoes">Observações</label>
+          <textarea id="note-observacoes" rows="3" placeholder="Adicione qualquer detalhe relevante..."></textarea>
+        </div>
+      </form>
+      <div class="form-actions border-t-0 pt-0 mt-6">
+        <a href="#/dashboard" class="btn btn-secondary">Cancelar</a>
+        <button type="button" id="btn-proceed-to-applications" class="btn btn-primary">
+          Prosseguir para Lançamentos <i class="ph ph-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- Seção 2: Itens e Serviços (Inicialmente Oculta) -->
+    <section id="note-items-section" class="p-6 hidden">
+      <!-- Sub-seção Materiais -->
+      <h2 class="form-section-title mb-6">2. Materiais Aplicados / Retirados</h2>
+      <form id="form-add-application" class="mb-8">
+        <div class="filter-bar p-0 bg-transparent border-none">
+          <div class="filter-group" style="flex-grow: 2;"><label for="app-material-search">Material*</label><div class="searchable-select-container"><input type="text" id="app-material-search" placeholder="Digite para buscar..." autocomplete="off" required><div id="app-material-results" class="searchable-results-list"></div></div></div>
+          <div class="filter-group"><label for="app-type">Tipo*</label><select id="app-type" required></select></div>
+          <div class="filter-group"><label for="app-quantity">Qtd.*</label><input type="number" id="app-quantity" required min="0.01" step="any" class="text-right" placeholder="0.00"></div>
+          <div class="filter-group"><label>&nbsp;</label><button type="submit" class="btn btn-primary w-full"><i class="ph ph-plus"></i> Adicionar</button></div>
+        </div>
+      </form>
+      <div class="table-container"><table class="data-table" id="table-added-applications"><thead><tr><th>Material</th><th>Código</th><th>Tipo</th><th>Quantidade</th><th class="w-16 text-right">Ações</th></tr></thead><tbody></tbody></table></div>
+      <div id="empty-state-applications" class="empty-state"></div>
+      <hr class="my-8">
+      <!-- Sub-seção Serviços -->
+      <h2 class="form-section-title mb-6">3. Serviços Executados</h2>
+      <form id="form-add-service" class="mb-8">
+        <div class="filter-bar p-0 bg-transparent border-none">
+          <div class="filter-group" style="flex-grow: 3;"><label for="app-service-search">Serviço*</label><div class="searchable-select-container"><input type="text" id="app-service-search" placeholder="Digite para buscar o serviço..." autocomplete="off" required><div id="app-service-results" class="searchable-results-list"></div></div></div>
+          <div class="filter-group"><label>&nbsp;</label><button type="submit" class="btn btn-primary w-full"><i class="ph ph-plus"></i> Adicionar Serviço</button></div>
+        </div>
+      </form>
+      <div class="table-container"><table class="data-table" id="table-added-services"><thead><tr><th>Serviço</th><th>Código</th><th class="w-16 text-right">Ações</th></tr></thead><tbody></tbody></table></div>
+      <div id="empty-state-services" class="empty-state"></div>
+      <!-- Ações Finais -->
+      <div class="form-actions mt-8">
+        <button type="button" id="btn-back-to-note-header" class="btn btn-secondary"><i class="ph ph-arrow-left"></i> Voltar</button>
+        <button type="button" id="btn-save-note" class="btn btn-primary"><i class="ph ph-check-circle"></i> Finalizar Lançamento</button>
+      </div>
+    </section>
+  </main>
+</template>
+
+<!-- Template para a Nova Página: Consultar Notas -->
+<template id="template-note-tracking">
+  <div class="page-header">
+    <div>
+      <h1>Consultar Notas de Campo</h1>
+      <p>Visualize e filtre todas as notas de campo lançadas.</p>
+    </div>
+    <div class="header-actions">
+      <a href="#/technical/new-note" class="btn-primary">
+        <i class="ph ph-plus"></i> Lançar Nova Nota
+      </a>
+    </div>
+  </div>
+  <div class="filter-bar">
+    <div class="filter-group"><label for="filter-note-type">Tipo de Nota</label><select id="filter-note-type"></select></div>
+    <div class="filter-group"><label for="filter-note-equipe">Equipe</label><select id="filter-note-equipe"></select></div>
+    <div class="filter-group"><label for="filter-note-base">Base</label><select id="filter-note-base"></select></div>
+    <div class="filter-group search"><label for="busca-note">Busca</label><div class="search-container"><input type="text" id="busca-note" placeholder="Número da nota, observações..."></div></div>
+  </div>
+  <div class="table-container">
+    <table class="data-table" id="tabela-notas">
+      <thead><tr><th>Nº da Nota</th><th>Tipo</th><th>Equipe</th><th>Base</th><th>Usuário</th><th>Data</th><th>Ações</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-notas" class="empty-state"></div>
+  <div class="pagination-controls" id="pagination-notas"></div>
+</template>
 
 <!-- NOVO TEMPLATE PARA O PAINEL DE CADASTRO (DRAWER) -->
 <template id="template-drawer">

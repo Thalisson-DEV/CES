@@ -9,6 +9,8 @@ import { renderNewCommercialRequestPage } from './pages/new-commercial-request.j
 import { renderCommercialRequestDetailsPage } from './pages/commercial-request-details.js';
 import { renderCommercialApprovalsPage } from './pages/commercial-approvals.js';
 import { renderCommercialApprovalsDetailsPage } from './pages/commercial-approvals-details.js';
+import { renderNewFieldNotePage } from './pages/field-note.js';
+import { renderNoteTrackingPage } from './pages/note-tracking.js';
 import { showUserProfileModal, closeAllModals } from './components.js';
 
 
@@ -21,10 +23,12 @@ const routes = {
     '/works': renderWorksPage,
     '/teams': renderTeamsPage,
     '/users': renderUsersPage,
-    '/commercial/tracking': renderCommercialTrackingPage,
+    '/commercial/material-tracking': renderCommercialTrackingPage,
     '/commercial/new-request': renderNewCommercialRequestPage,
     '/commercial/request/:id': renderCommercialRequestDetailsPage,
     '/commercial/approvals': renderCommercialApprovalsPage,
+    '/commercial/new-note': renderNewFieldNotePage,
+    '/commercial/note-tracking': renderNoteTrackingPage,
     '/commercial/approvals/:id': renderCommercialApprovalsDetailsPage,
 };
 
@@ -102,7 +106,7 @@ export function setupMainAppLayout() {
     const sidebarLinks = document.querySelectorAll('.sidebar-link[data-menu]');
     const submenuContents = document.querySelectorAll('.submenu-content');
 
-    // --- LÓGICA DE CLIQUE DO MENU LATERAL CORRIGIDA ---
+    // --- LÓGICA DE CLIQUE DO MENU LATERAL (SIDEBAR) ---
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -112,7 +116,6 @@ export function setupMainAppLayout() {
             const targetSubmenu = document.getElementById(`submenu-${menuId}`);
             const isSameMenu = link.classList.contains('active');
 
-            // Caso especial para o Dashboard, que não tem submenu
             if (!targetSubmenu) {
                 window.location.hash = link.getAttribute('href').substring(1);
                 appContainer.classList.remove('submenu-open');
@@ -120,12 +123,9 @@ export function setupMainAppLayout() {
                 link.classList.add('active');
                 return;
             }
-
-            // Se clicar no mesmo menu que já está aberto, fecha o painel.
             if (isSameMenu && appContainer.classList.contains('submenu-open')) {
                 appContainer.classList.remove('submenu-open');
             } else {
-                // Se clicar em outro menu, ou no mesmo com o painel fechado, abre.
                 sidebarLinks.forEach(l => l.classList.remove('active'));
                 submenuContents.forEach(s => s.classList.remove('active'));
                 link.classList.add('active');
@@ -135,6 +135,26 @@ export function setupMainAppLayout() {
         });
     });
 
+    // --- NOVA LÓGICA PARA O DROPDOWN DO SUBMENU ---
+    const submenuPanel = document.querySelector('.submenu-panel');
+    if (submenuPanel) {
+        submenuPanel.addEventListener('click', (e) => {
+            const toggleButton = e.target.closest('.submenu-dropdown-toggle');
+            if (toggleButton) {
+                e.preventDefault();
+                // Fecha outros dropdowns abertos para funcionar como um accordion
+                submenuPanel.querySelectorAll('.submenu-dropdown-toggle.open').forEach(openToggle => {
+                    if (openToggle !== toggleButton) {
+                        openToggle.classList.remove('open');
+                    }
+                });
+                // Abre ou fecha o dropdown clicado
+                toggleButton.classList.toggle('open');
+            }
+        });
+    }
+
+    // --- LÓGICA DOS BOTÕES GLOBAIS ---
     document.getElementById('logoutButton').addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('jwt_token');
@@ -164,34 +184,37 @@ export function updateMenuActiveState() {
 
     let activeMenuId = null;
 
-    // Reseta o estado de todos os links e submenus
     sidebarLinks.forEach(l => l.classList.remove('active'));
     pageLinks.forEach(l => l.classList.remove('active'));
     submenuContents.forEach(s => s.classList.remove('active'));
     appContainer.classList.remove('submenu-open');
 
-    // Encontra o link do submenu que corresponde à URL atual
     const activePageLink = Array.from(pageLinks).find(link => link.getAttribute('href') === path);
 
     if (activePageLink) {
-        // Ativa o link do submenu e seu painel pai
         activePageLink.classList.add('active');
         const parentSubmenu = activePageLink.closest('.submenu-content');
         if (parentSubmenu) {
             parentSubmenu.classList.add('active');
             activeMenuId = parentSubmenu.id.split('-')[1];
+
+            // Abre o dropdown pai se houver um
+            const parentDropdown = activePageLink.closest('.submenu-dropdown-content');
+            if (parentDropdown) {
+                const toggle = parentDropdown.previousElementSibling;
+                if (toggle && toggle.classList.contains('submenu-dropdown-toggle')) {
+                    toggle.classList.add('open');
+                }
+            }
         }
     } else if (path === '#/dashboard' || path === '#/' || path === '') {
-        // Caso especial para o dashboard
         activeMenuId = 'dashboard';
     }
 
-    // Ativa o ícone principal correspondente na sidebar
     if (activeMenuId) {
         const activeSidebarLink = document.querySelector(`.sidebar-link[data-menu="${activeMenuId}"]`);
         if (activeSidebarLink) {
             activeSidebarLink.classList.add('active');
-            // Abre o painel do submenu se não for o dashboard
             if (activeMenuId !== 'dashboard') {
                 appContainer.classList.add('submenu-open');
             }

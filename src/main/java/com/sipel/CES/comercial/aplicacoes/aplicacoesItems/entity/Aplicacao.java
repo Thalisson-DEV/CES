@@ -1,7 +1,7 @@
-package com.sipel.CES.comercial.notas.aplicacoes.aplicacoesItems.entity;
+package com.sipel.CES.comercial.aplicacoes.aplicacoesItems.entity;
 
 import com.sipel.CES.choreCadastros.materiais.entity.Material;
-import com.sipel.CES.comercial.notas.aplicacoes.tipoAplicacoes.entity.TipoAplicacoes;
+import com.sipel.CES.comercial.aplicacoes.tipoAplicacoes.entity.TipoAplicacoes;
 import com.sipel.CES.comercial.notas.entity.Nota;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

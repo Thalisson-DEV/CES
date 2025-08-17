@@ -1,4 +1,4 @@
-package com.sipel.CES.comercial.notas.aplicacoes.aplicacoesItems.controller;
+package com.sipel.CES.comercial.aplicacoes.aplicacoesItems.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

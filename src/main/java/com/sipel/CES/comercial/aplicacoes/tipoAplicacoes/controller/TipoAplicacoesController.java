@@ -1,7 +1,7 @@
-package com.sipel.CES.comercial.notas.aplicacoes.tipoAplicacoes.controller;
+package com.sipel.CES.comercial.aplicacoes.tipoAplicacoes.controller;
 
-import com.sipel.CES.comercial.notas.aplicacoes.tipoAplicacoes.entity.TipoAplicacoes;
-import com.sipel.CES.comercial.notas.aplicacoes.tipoAplicacoes.repository.TipoAplicacoesRepository;
+import com.sipel.CES.comercial.aplicacoes.tipoAplicacoes.entity.TipoAplicacoes;
+import com.sipel.CES.comercial.aplicacoes.tipoAplicacoes.repository.TipoAplicacoesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

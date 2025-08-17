@@ -1,11 +1,9 @@
-package com.sipel.CES.users.DTOs; // Verifique se o pacote está correto
+package com.sipel.CES.users.DTOs;
 
 import com.sipel.CES.choreCadastros.basesOperacionais.entity.BaseOperacional;
-import com.sipel.CES.choreCadastros.perfis.entity.Perfis;
 import com.sipel.CES.generic.entitys.Perfil;
 import com.sipel.CES.users.entity.Usuario;
 
-// Este DTO expõe apenas os dados seguros da entidade Usuario.
 public record UsuarioResponseDTO(
         Long id,
         String nomeCompleto,
