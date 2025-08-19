@@ -206,7 +206,7 @@ function renderAddedItemsTable() {
         tableBody.parentElement.style.display = 'none';
     } else {
         emptyState.style.display = 'none';
-        tableBody.parentElement.style.display = 'table';
+        tableBody.closest('.table-container').style.display = 'table';
         addedItems.forEach(item => {
             const tr = tableBody.insertRow();
             tr.innerHTML = `

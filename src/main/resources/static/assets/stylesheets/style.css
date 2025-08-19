@@ -954,6 +954,15 @@ a {
     color: var(--text-primary);
 }
 
+.search-input {
+    padding: 12px 16px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
 .item-quantity-input {
     padding: 12px 16px;
     border-radius: 5px;
