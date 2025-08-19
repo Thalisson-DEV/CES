@@ -2,8 +2,12 @@ package com.sipel.CES.choreCadastros.contrato;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -11,6 +15,11 @@ public class ContratoService {
 
     @Autowired
     private ContratoRepository repository;
+
+    public Page<ContratoResponseDTO> getAllContratos(String searchTerm, Pageable pageable) {
+        Page<Contrato> contratos = repository.findWithFilters(searchTerm, pageable);
+        return contratos.map(ContratoResponseDTO::new);
+    }
 
     public ContratoResponseDTO getContratoById(int id) {
         Contrato contrato = repository.findById(id)
@@ -51,8 +60,16 @@ public class ContratoService {
         entity.setDescricao(dto.descricao());
         entity.setDataInicio(dto.dataInicio());
         entity.setDataFim(dto.dataFim());
-        entity.setAtivo(dto.ativo());
-        entity.setDataCriacao(dto.dataCriacao());
+       if (entity.getId() == 0) {
+           entity.setAtivo(true);
+       } else {
+           if (dto.ativo() != null) {
+               entity.setAtivo(dto.ativo());
+           }
+       }
+       if (entity.getDataCriacao() == null) {
+           entity.setDataCriacao(OffsetDateTime.now());
+       }
    }
 
 

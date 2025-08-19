@@ -157,13 +157,20 @@ function renderWorksTable(works) {
 function renderPaginationControls(pageData) {
     const container = document.getElementById('pagination-obras');
     if (!container) return;
-    const { totalElements, totalPages, number: pageIndex, size, first, last } = pageData;
+
+    const { number: pageIndex, size, totalElements, totalPages } = pageData.page;
+    const numberOfElements = pageData.content.length;
+
     if (totalElements === 0) {
         container.innerHTML = '';
         return;
     }
+
+    const first = (pageIndex === 0);
+    const last = (pageIndex === totalPages - 1);
     const startItem = pageIndex * size + 1;
-    const endItem = startItem + pageData.numberOfElements - 1;
+    const endItem = startItem + numberOfElements - 1;
+
     container.innerHTML = `
         <div class="pagination-summary">Mostrando <strong>${startItem}</strong>-<strong>${endItem}</strong> de <strong>${totalElements}</strong></div>
         <div class="pagination-size">

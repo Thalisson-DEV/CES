@@ -1,13 +1,14 @@
 package com.sipel.CES.choreCadastros.contrato;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 public record ContratoDTO(
         String numeroContrato,
         String descricao,
-        OffsetDateTime dataInicio,
-        OffsetDateTime dataFim,
-        boolean ativo,
+        Date dataInicio,
+        Date dataFim,
+        Boolean ativo,
         OffsetDateTime dataCriacao
 ) {
 }

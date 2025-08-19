@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 @Entity(name = "contrato")
 @Table(name = "contratos")
@@ -20,8 +21,8 @@ public class Contrato {
     private int id;
     private String numeroContrato;
     private String descricao;
-    private OffsetDateTime dataInicio;
-    private OffsetDateTime dataFim;
+    private Date dataInicio;
+    private Date dataFim;
     private boolean ativo;
     private OffsetDateTime dataCriacao;
 }

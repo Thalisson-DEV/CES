@@ -123,15 +123,18 @@ function renderPaginationControls(pageData) {
     const container = document.getElementById('pagination-materiais');
     if (!container) return;
 
-    const { totalElements, totalPages, number: currentPageIndex, size, first, last } = pageData;
+    const { number: pageIndex, size, totalElements, totalPages } = pageData.page;
+    const numberOfElements = pageData.content.length;
 
     if (totalElements === 0) {
         container.innerHTML = '';
         return;
     }
 
-    const startItem = currentPageIndex * size + 1;
-    const endItem = startItem + pageData.numberOfElements - 1;
+    const first = (pageIndex === 0);
+    const last = (pageIndex === totalPages - 1);
+    const startItem = pageIndex * size + 1;
+    const endItem = startItem + numberOfElements - 1;
 
     container.innerHTML = `
         <div class="pagination-summary">
@@ -149,7 +152,7 @@ function renderPaginationControls(pageData) {
         </div>
         <div class="pagination-nav">
             <button class="btn-icon" id="prev-page-mat" ${first ? 'disabled' : ''}><i class="ph ph-caret-left"></i></button>
-            <span class="page-info">Página ${currentPageIndex + 1} de ${totalPages}</span>
+            <span class="page-info">Página ${pageIndex + 1} de ${totalPages}</span>
             <button class="btn-icon" id="next-page-mat" ${last ? 'disabled' : ''}><i class="ph ph-caret-right"></i></button>
         </div>
     `;

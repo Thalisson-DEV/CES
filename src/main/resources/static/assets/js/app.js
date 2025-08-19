@@ -4,6 +4,7 @@ import { renderMaterialsPage } from './pages/materiais.js';
 import { renderWorksPage } from './pages/works.js';
 import { renderTeamsPage } from './pages/teams.js';
 import { renderUsersPage } from './pages/users.js';
+import { renderContractsPage } from './pages/contracts.js';
 import { renderCommercialTrackingPage } from './pages/commercial-tracking.js';
 import { renderNewCommercialRequestPage } from './pages/new-commercial-request.js';
 import { renderCommercialRequestDetailsPage } from './pages/commercial-request-details.js';
@@ -23,6 +24,7 @@ const routes = {
     '/works': renderWorksPage,
     '/teams': renderTeamsPage,
     '/users': renderUsersPage,
+    '/contracts': renderContractsPage,
     '/commercial/material-tracking': renderCommercialTrackingPage,
     '/commercial/new-request': renderNewCommercialRequestPage,
     '/commercial/request/:id': renderCommercialRequestDetailsPage,

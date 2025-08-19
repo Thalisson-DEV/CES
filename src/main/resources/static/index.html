@@ -96,6 +96,7 @@
           <li><a href="#/works" class="page-link">Obras</a></li>
           <li><a href="#/teams" class="page-link">Equipes</a></li>
           <li><a href="#/users" class="page-link">Usuários</a></li>
+          <li><a href="#/contracts" class="page-link">Contratos</a></li>
         </ul>
       </div>
       <!-- NOVO SUBMENU COMERCIAL -->
@@ -462,6 +463,51 @@
 
   <!-- CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-usuarios"></div>
+</template>
+
+<template id="template-contracts">
+  <div class="page-header">
+    <div>
+      <h1>Gerenciamento de Contratos</h1>
+      <p>Adicione e gerencie os contratos de serviço.</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-novo-contrato" class="btn-primary">
+        <i class="ph ph-plus"></i> Novo Contrato
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group search">
+      <label for="busca-contrato">Busca por texto</label>
+      <div class="search-container">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="busca-contrato" placeholder="Número do contrato, descrição...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-contratos">
+      <thead>
+      <tr>
+        <th>Número do Contrato</th>
+        <th>Descrição</th>
+        <th>Data de Início</th>
+        <th>Data de Fim</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-contratos" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-contratos"></div>
 </template>
 
 <template id="template-commercial-tracking">
