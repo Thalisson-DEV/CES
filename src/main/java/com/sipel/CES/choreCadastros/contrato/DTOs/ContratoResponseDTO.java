@@ -1,4 +1,6 @@
-package com.sipel.CES.choreCadastros.contrato;
+package com.sipel.CES.choreCadastros.contrato.DTOs;
+
+import com.sipel.CES.choreCadastros.contrato.entity.Contrato;
 
 import java.time.OffsetDateTime;
 import java.util.Date;

@@ -1,5 +1,6 @@
-package com.sipel.CES.choreCadastros.contrato;
+package com.sipel.CES.choreCadastros.contrato.repository;
 
+import com.sipel.CES.choreCadastros.contrato.entity.Contrato;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

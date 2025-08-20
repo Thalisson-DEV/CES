@@ -1,6 +1,6 @@
 package com.sipel.CES.choreCadastros.obras.controller;
 
-import com.sipel.CES.exceptions.ObraException;
+import com.sipel.CES.choreCadastros.obras.exceptions.ObraException;
 import com.sipel.CES.choreCadastros.obras.DTO.ObraResponseDTO;
 import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
 import com.sipel.CES.choreCadastros.obras.DTO.ObraDTO;

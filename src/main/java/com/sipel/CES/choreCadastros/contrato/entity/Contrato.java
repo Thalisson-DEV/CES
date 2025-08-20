@@ -1,4 +1,4 @@
-package com.sipel.CES.choreCadastros.contrato;
+package com.sipel.CES.choreCadastros.contrato.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

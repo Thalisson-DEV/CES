@@ -97,6 +97,7 @@
           <li><a href="#/teams" class="page-link">Equipes</a></li>
           <li><a href="#/users" class="page-link">Usuários</a></li>
           <li><a href="#/contracts" class="page-link">Contratos</a></li>
+          <li><a href="#/services" class="page-link">Serviços</a></li>
         </ul>
       </div>
       <!-- NOVO SUBMENU COMERCIAL -->
@@ -124,6 +125,18 @@
             <ul class="submenu-dropdown-content">
               <li><a href="#/commercial/new-note" class="page-link">Lançar Nota de Campo</a></li>
               <li><a href="#/commercial/note-tracking" class="page-link">Consultar Notas</a></li>
+              <!-- Adicionar outros links de produtividade aqui -->
+            </ul>
+          </li>
+          <li>
+            <button class="submenu-dropdown-toggle">
+              <span>Relatórios</span>
+              <i class="ph ph-caret-down"></i>
+            </button>
+            <ul class="submenu-dropdown-content">
+              <li><a href="#/dashboard" class="page-link">Saldo</a></li>
+              <li><a href="#/dashboard" class="page-link">Consultar Produtividade</a></li>
+              <li><a href="#/dashboard" class="page-link">Painel Produtividade</a></li>
               <!-- Adicionar outros links de produtividade aqui -->
             </ul>
           </li>
@@ -275,6 +288,66 @@
 
   <!-- NOVOS CONTROLES DE PAGINAÇÃO -->
   <div class="pagination-controls" id="pagination-materiais"></div>
+</template>
+
+<template id="template-services">
+  <div class="page-header">
+    <div>
+      <h1>Gerenciamento de Serviços</h1>
+      <p>Adicione e gerencie os serviços associados aos contratos.</p>
+    </div>
+    <div class="header-actions">
+      <a href="/assets/templates/modelo_materiais.xlsx" download class="btn-secondary">
+        <i class="ph ph-download-simple"></i> Baixar Modelo
+      </a>
+      <button id="btn-importar-servicos" class="btn-secondary">
+        <i class="ph ph-upload-simple"></i> Importar
+      </button>
+      <button id="btn-novo-servico" class="btn-primary">
+        <i class="ph ph-plus"></i> Novo Serviço
+      </button>
+      <input type="file" id="input-arquivo-servicos" accept=".xlsx, .xls" style="display: none;">
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-service-contrato">Contrato</label>
+      <select id="filter-service-contrato"></select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-service-processo">Processo</label>
+      <select id="filter-service-processo"></select>
+    </div>
+    <div class="filter-group search">
+      <label for="busca-servico">Busca por texto</label>
+      <div class="search-container">
+        <input type="text" id="busca-servico" placeholder="Código, descrição...">
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="tabela-servicos">
+      <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descrição</th>
+        <th>Contrato</th>
+        <th>Processo</th>
+        <th>Valor Ref.</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="empty-state-servicos" class="empty-state"></div>
+
+  <!-- CONTROLES DE PAGINAÇÃO -->
+  <div class="pagination-controls" id="pagination-servicos"></div>
 </template>
 
 <!-- TEMPLATE DE OBRAS ATUALIZADO -->
@@ -483,7 +556,6 @@
     <div class="filter-group search">
       <label for="busca-contrato">Busca por texto</label>
       <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="busca-contrato" placeholder="Número do contrato, descrição...">
       </div>
     </div>

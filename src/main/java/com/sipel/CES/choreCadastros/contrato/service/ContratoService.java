@@ -1,5 +1,9 @@
-package com.sipel.CES.choreCadastros.contrato;
+package com.sipel.CES.choreCadastros.contrato.service;
 
+import com.sipel.CES.choreCadastros.contrato.DTOs.ContratoDTO;
+import com.sipel.CES.choreCadastros.contrato.DTOs.ContratoResponseDTO;
+import com.sipel.CES.choreCadastros.contrato.entity.Contrato;
+import com.sipel.CES.choreCadastros.contrato.repository.ContratoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class ContratoService {

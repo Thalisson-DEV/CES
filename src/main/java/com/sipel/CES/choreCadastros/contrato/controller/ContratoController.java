@@ -1,5 +1,8 @@
-package com.sipel.CES.choreCadastros.contrato;
+package com.sipel.CES.choreCadastros.contrato.controller;
 
+import com.sipel.CES.choreCadastros.contrato.service.ContratoService;
+import com.sipel.CES.choreCadastros.contrato.DTOs.ContratoDTO;
+import com.sipel.CES.choreCadastros.contrato.DTOs.ContratoResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

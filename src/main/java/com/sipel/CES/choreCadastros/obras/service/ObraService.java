@@ -6,7 +6,7 @@ import com.sipel.CES.choreCadastros.supervisor.entity.Supervisor;
 import com.sipel.CES.choreCadastros.supervisor.repository.SupervisorRepository;
 import com.sipel.CES.generic.DTOs.ImportacaoResponseDTO;
 import com.sipel.CES.choreCadastros.obras.DTO.ObraResponseDTO;
-import com.sipel.CES.exceptions.ObraException;
+import com.sipel.CES.choreCadastros.obras.exceptions.ObraException;
 import com.sipel.CES.choreCadastros.basesOperacionais.entity.BaseOperacional;
 import com.sipel.CES.choreCadastros.basesOperacionais.repository.BaseOperacionalRepository;
 import com.sipel.CES.choreCadastros.obras.DTO.ObraDTO;
@@ -23,23 +23,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.Pageable; // <-- ADICIONE ESTA LINHA
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ObraService {
@@ -94,7 +89,7 @@ public class ObraService {
         repository.deleteById(id);
     }
 
-    public ImportacaoResponseDTO importarObras(MultipartFile file) {
+    public ImportacaoResponseDTO importarObras(@NotNull MultipartFile file) {
         if (file.isEmpty()) {
             throw new RuntimeException("O arquivo enviado está vazio.");
         }

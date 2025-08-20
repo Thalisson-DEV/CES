@@ -5,6 +5,7 @@ import { renderWorksPage } from './pages/works.js';
 import { renderTeamsPage } from './pages/teams.js';
 import { renderUsersPage } from './pages/users.js';
 import { renderContractsPage } from './pages/contracts.js';
+import { renderServicesPage } from './pages/services.js';
 import { renderCommercialTrackingPage } from './pages/commercial-tracking.js';
 import { renderNewCommercialRequestPage } from './pages/new-commercial-request.js';
 import { renderCommercialRequestDetailsPage } from './pages/commercial-request-details.js';
@@ -25,6 +26,7 @@ const routes = {
     '/teams': renderTeamsPage,
     '/users': renderUsersPage,
     '/contracts': renderContractsPage,
+    '/services': renderServicesPage,
     '/commercial/material-tracking': renderCommercialTrackingPage,
     '/commercial/new-request': renderNewCommercialRequestPage,
     '/commercial/request/:id': renderCommercialRequestDetailsPage,
@@ -137,20 +139,13 @@ export function setupMainAppLayout() {
         });
     });
 
-    // --- NOVA LÓGICA PARA O DROPDOWN DO SUBMENU ---
+    // --- NOVA LÓGICA PARA O DROPDOWN DO SUBMENU (CORRIGIDA) ---
     const submenuPanel = document.querySelector('.submenu-panel');
     if (submenuPanel) {
         submenuPanel.addEventListener('click', (e) => {
             const toggleButton = e.target.closest('.submenu-dropdown-toggle');
             if (toggleButton) {
                 e.preventDefault();
-                // Fecha outros dropdowns abertos para funcionar como um accordion
-                submenuPanel.querySelectorAll('.submenu-dropdown-toggle.open').forEach(openToggle => {
-                    if (openToggle !== toggleButton) {
-                        openToggle.classList.remove('open');
-                    }
-                });
-                // Abre ou fecha o dropdown clicado
                 toggleButton.classList.toggle('open');
             }
         });
