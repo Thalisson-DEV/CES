@@ -1,108 +1,119 @@
 <div align="center">
-<!-- ><img src="https://placehold.co/200x200/111827/ffffff?text=CES" alt="CES Logo" width="200"/> -->
-<h1>CES - Controle de Estoque SIPEL</h1>
-<p>
-<strong>Uma aplicação web full-stack para a gestão completa de materiais, obras, equipes e solicitações operacionais, construída com uma stack moderna e com foco na experiência do utilizador.</strong>
-</p>
-<p>
-<img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow" alt="Status do Projeto: Em Desenvolvimento">
-<img src="https://img.shields.io/badge/Java-17%2B-blue?logo=openjdk&logoColor=white" alt="Java 17+">
-<img src="https://img.shields.io/badge/Spring%20Boot-3.x-green?logo=spring-boot" alt="Spring Boot 3.x">
-<img src="https://img.shields.io/badge/PostgreSQL-blue?logo=postgresql" alt="PostgreSQL">
-<img src="https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript" alt="JavaScript ES6+">
-</p>
+  <!-- <img src="https://placehold.co/200x200/111827/ffffff?text=CES" alt="CES Logo" width="200"/> -->
+  <h1>📦 CES - Controle de Estoque SIPEL</h1>
+  <p>
+    <strong>Aplicação web full-stack para gestão completa de materiais, obras, equipes e solicitações operacionais, desenvolvida com uma stack moderna e foco total na experiência do usuário.</strong>
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow" alt="Status do Projeto: Em Desenvolvimento">
+    <img src="https://img.shields.io/badge/Java-17%2B-blue?logo=openjdk&logoColor=white" alt="Java 17+">
+    <img src="https://img.shields.io/badge/Spring%20Boot-3.x-green?logo=spring-boot" alt="Spring Boot 3.x">
+    <img src="https://img.shields.io/badge/PostgreSQL-blue?logo=postgresql" alt="PostgreSQL">
+    <img src="https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript" alt="JavaScript ES6+">
+  </p>
 </div>
 
-📋 Índice
-1. Sobre o Projeto
+---
 
-2. Funcionalidades Principais
+## 📋 Índice
+1. [Sobre o Projeto](#-sobre-o-projeto)  
+2. [Funcionalidades Principais](#-funcionalidades-principais)  
+3. [Layout da Aplicação](#️-layout-da-aplicação)  
+4. [Tecnologias Utilizadas](#-tecnologias-utilizadas)  
+5. [Como Executar o Projeto](#-como-executar-o-projeto)  
+6. [Contribuições](#-contribuições)  
+7. [Contato](#-contato)  
 
-3. Layout da Aplicação
+---
 
-4. Tecnologias Utilizadas
+## 📚 Sobre o Projeto
+O **CES (Controle de Estoque SIPEL)** foi desenvolvido para **centralizar e otimizar a gestão de recursos operacionais**.  
+Com ele, é possível controlar de forma detalhada os materiais, acompanhar obras em andamento, gerenciar equipes e processar solicitações comerciais.  
 
-5. Como Executar o Projeto
+👉 O sistema substitui processos manuais por fluxos digitais, garantindo **mais agilidade, segurança e confiabilidade** no dia a dia.
 
-6. Contribuições
+---
 
-7. Contato
+## ✨ Funcionalidades Principais
+- 🔐 **Autenticação Segura:** Login com JWT e controle de acesso baseado em roles.  
+- 📊 **Dashboard Intuitivo:** KPIs para visão geral rápida das operações (em desenvolvimento).  
+- 📁 **Gestão de Cadastros:** Materiais, Obras, Equipes e Usuários com CRUD completo.  
+- 🔎 **Paginação e Filtros:** Busca em tempo real e filtros avançados em todas as tabelas.  
+- 📝 **Fluxo de Solicitações:** Criação, acompanhamento e gestão de itens e status.  
+- 📥 **Importação de Dados:** Importação em massa de arquivos Excel.  
+- 📧 **Notificações Automáticas:** Envio de e-mails assíncronos para responsáveis.  
 
-📚 Sobre o Projeto
-O CES (Controle de Estoque SIPEL) foi desenvolvido para centralizar e otimizar a gestão de recursos operacionais. A plataforma permite o controle detalhado de materiais, o acompanhamento de obras, a gestão de equipes e o processamento de solicitações comerciais, substituindo processos manuais por um fluxo de trabalho digital, rápido e seguro.
+---
 
-✨ Funcionalidades Principais
-✅ Autenticação Segura: Sistema de login baseado em tokens JWT com controlo de acesso por roles.
-✅ Dashboard Intuitivo: Tela inicial com KPIs para uma visão geral rápida das operações. (Ainda ficticios)
-✅ Gestão de Cadastros: Módulos completos para Materiais, Obras, Equipes e Usuários.
-✅ Paginação e Filtros: Interface com paginação, filtros avançados e busca em tempo real em todas as tabelas.
-✅ Fluxo de Solicitações: Sistema de criação e acompanhamento de solicitações comerciais, com gestão de itens e status.
-✅ Importação de Dados: Funcionalidade para importar dados em massa a partir do Excel.
-✅ Notificações Automáticas: Envio de e-mails assíncronos para notificar os responsáveis sobre novas solicitações.
+## 🖥️ Layout da Aplicação
+A aplicação conta com um design **moderno, responsivo e intuitivo**, incluindo:  
+- Barra lateral de navegação principal.  
+- Submenus contextuais.  
+- Área de conteúdo dinâmica.  
 
-🖥️ Layout da Aplicação
-A aplicação possui um layout moderno e responsivo, com uma barra lateral de navegação principal, um submenu contextual e uma área de conteúdo dinâmica, garantindo uma experiência de utilizador consistente e intuitiva em todas as telas.
+---
 
-(Aqui você pode adicionar screenshots da sua aplicação)
+## 🛠️ Tecnologias Utilizadas
+O projeto é estruturado em duas camadas principais:
 
-🛠️ Tecnologias Utilizadas
-O projeto é dividido em duas partes principais:
+### 🔹 Backend
+- **Linguagem:** Java 17+  
+- **Framework:** Spring Boot 3  
+- **Segurança:** Spring Security + JWT  
+- **Banco de Dados:** PostgreSQL  
+- **ORM:** Spring Data JPA / Hibernate  
+- **Migrações:** Flyway  
+- **Build Tool:** Maven  
 
-Backend
-Linguagem: Java 17+
+### 🔹 Frontend
+- **Linguagens:** HTML5, CSS3, JavaScript (ES6+)  
+- **Arquitetura:** SPA (*Single-Page Application*) com **Vanilla JS**  
+- **Diferencial:** Construído sem frameworks, priorizando **performance e controle total**.  
 
-Framework: Spring Boot 3
+---
 
-Segurança: Spring Security com autenticação JWT.
+## 🚀 Como Executar o Projeto
+O **backend Spring Boot** serve os arquivos estáticos do **frontend**.  
 
-Banco de Dados: PostgreSQL
+### 🔧 Pré-requisitos
+- Java JDK 17 ou superior  
+- Maven 3.x  
+- PostgreSQL instalado localmente  
 
-Persistência: Spring Data JPA / Hibernate
-
-Migrações: Flyway
-
-Build Tool: Maven
-
-Frontend
-Linguagens: HTML5, CSS3, JavaScript
-
-Arquitetura: SPA (Single-Page Application) construída com Vanilla JS, sem frameworks, para máximo controlo e performance.
-
-🚀 Como Executar o Projeto
-Para executar o projeto localmente, o backend do Spring Boot servirá os ficheiros estáticos do frontend.
-
-Pré-requisitos
-Java JDK 17 ou superior
-
-Maven 3.x
-
-PostgreSQL (localmente)
-
-Backend e Frontend
-Clone o repositório:
-
+### ▶️ Passo a passo
+```bash
+# Clone o repositório
 git clone https://github.com/Thalisson-DEV/CES
 
-Navegue até à pasta do projeto:
-
+# Acesse a pasta do projeto
 cd CES
 
-Configure as suas credenciais do PostgreSQL e do serviço de e-mail no application.properties.
+# Configure suas credenciais no arquivo application.properties
+# (Banco PostgreSQL e serviço de e-mail)
 
-Certifique-se de que os seus ficheiros de frontend (index.html, style.css, etc.) estão na pasta src/main/resources/static.
+# Certifique-se de que os arquivos do frontend (index.html, style.css, etc.)
+# estão em src/main/resources/static
 
-Instale as dependências e execute a aplicação:
-
+# Execute a aplicação
 mvn spring-boot:run
+➡ O servidor estará disponível em: http://localhost:8080
 
-O servidor rodará em http://localhost:8080.
+```
 
 🤝 Contribuições
-Este projeto está em desenvolvimento. Contribuições, sugestões e feedbacks são muito bem-vindos! Sinta-se à vontade para abrir uma issue ou um pull request.
+O projeto está em constante evolução 🚧.
+Contribuições, sugestões e feedbacks são muito bem-vindos!
+
+Abra uma issue para reportar problemas ou sugerir melhorias.
+
+Crie um pull request para colaborar diretamente.
 
 👤 Contato
-Thalisson Damião
+Thalisson Damião - 74988550297
 
-LinkedIn: www.linkedin.com/in/thalisson-damião-108a1732b
+💼 LinkedIn: https://www.linkedin.com/in/thalisson-dami%C3%A3o-108a1732b/
 
-Email: thalissondamiao1@gmail.com
+📧 E-mail: thalissondamiao1@gmail.com
+
+---
