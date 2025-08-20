@@ -101,6 +101,8 @@ mvn spring-boot:run
 
 ```
 
+---
+
 🤝 Contribuições
 O projeto está em constante evolução 🚧.
 Contribuições, sugestões e feedbacks são muito bem-vindos!
